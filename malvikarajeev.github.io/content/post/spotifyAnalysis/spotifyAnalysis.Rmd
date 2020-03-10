@@ -1,0 +1,172 @@
+---
+title: "Spotify!"
+author: "Malvika Rajeev"
+output: html_document
+runtime: shiny
+---
+
+So a while ago my friend who just started using RStudio and is a bit overexcited about working with data told me about getting all your spotify data is totally doable, all you gotta do is email spotify.
+Follow the link here for more details: https://support.spotify.com/ca-en/article/data-rights-and-privacy-settings/
+
+
+Spotify will email your data in a zip format in JSON files. I use the jsonlite package in R to read the data in.
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+library(jsonlite)
+library(ggplot2)
+library(tidyverse)
+library(crosstalk)
+library(leaflet)
+library(plotly)
+library(ggthemes)
+library(lubridate)
+```
+
+
+
+```{r read-in}
+urlspot = "https://raw.githubusercontent.com/malvikarajeev/spotifyAnalysis/master/"
+
+spot0 = jsonlite::read_json(paste(urlspot,"StreamingHistory0.json", sep = ""), simplifyVector = T)
+
+spot1 = jsonlite::read_json(paste(urlspot,"StreamingHistory1.json", sep = ""), simplifyVector = T)
+
+spot = rbind(spot0, spot1)
+
+```
+
+The data is pretty straightforward: the time the track ended streaming, artist and track name, and the milliseconds it was listened to.
+I'll use shiny to visualise my streaming trends. 
+
+
+
+
+
+
+##using lubridate to get end times
+```{r}
+spot$end_time = as.POSIXct(strptime(spot$endTime, "%Y-%m-%d %H:%M"))
+spot$date = date(spot$end_time)
+spot$month = month(spot$date, label = T)
+
+customm = function(date){
+  temp = strsplit(date, ' ') %>% unlist
+  temp2 = temp[2]
+  return(temp2)
+}
+  
+  
+  
+  
+spot$only_time = parse_time(sapply(spot$endTime, customm))
+
+
+
+
+
+
+```
+
+```{r time_inter}
+ 
+my_seconds <- period_to_seconds(hms(spot$only_time))
+myIntervals <- c("0 AM - 6 AM", "6 AM - 12 PM", "12 PM - 6 PM", "6 PM - 0 AM")
+spot$interval <- myIntervals[findInterval(my_seconds, c(0, 6, 12, 18, 24) * 3600)]
+
+##I want to group by interval, trackName, sum up the milliseconds, and get highest milisecond for each interval arrranged by trackname
+
+interval_artist = spot %>% group_by(interval, trackName) %>% summarise(s = sum(msPlayed)) %>% arrange(-s) %>% top_n(20, s)
+
+
+
+```
+
+
+For shiny documents/chunks, make sure cache = FALSE. Markdown can't cache shiny stuff since the `reactive` function already does that. 
+
+Shiny can be used to create some pretty interactive visualisations. I wanted to see what kind of music I listen to monthly, and what times. A simple if-else clause in your ggplot can simplify visualisation according to user specification.
+
+```{r shinyshit, cache = F, echo = F, eval = F}
+##only for 2019. 
+
+spot2019 = spot[year(spot$date) == 2019,]
+
+
+library(shiny)
+library(ggthemes)
+ui <- fluidPage(
+  titlePanel("Monthly top artists"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      helpText("Select track or artist choice, and the month"),
+      radioButtons("radio", label = h4("trackname or artist?"),
+    choices = list("Track Name" = 'trackName', "Artist" = 'artistName')), 
+    
+      radioButtons("interval", label = h4("show time of day?"),
+                   choices = list("Yes" = TRUE, "No" = FALSE)),
+
+      
+      selectInput("month", label = "Month",
+                  choices = unique(spot$month),
+                  selected = "Oct"),
+      
+      sliderInput("top_n", "pick top tracks to display", min = 1, max = 50, value = c(1,50))
+    ),
+    
+    mainPanel(plotOutput(outputId = "top_tracks")
+    
+  )
+)
+)
+
+#load()
+
+server <- function(input, output) {
+  
+  outputR = reactive({
+    Mode = function(x) {
+                ux = unique(x)
+                ux[which.max(tabulate(match(x, ux)))]
+    }
+    
+    
+    req(input$month)
+    req(input$top_n)
+    req(input$radio)
+    req(input$interval)
+    
+    temp = spot2019 %>% filter(month == input$month) %>% group_by(!! sym(input$radio)) %>% summarise(minutes = sum(msPlayed)/60000, interval = Mode(interval)) %>% arrange(-minutes)
+    temp = temp[input$top_n[1]:input$top_n[2],]
+    
+    m = 'minutes'
+    g= ggplot(temp, aes_string(x = input$radio, y = m ))
+    
+    if (input$interval) {
+      g = g + geom_bar(aes(fill = interval), stat = 'identity')}
+    else {
+      g = g + geom_bar(stat = 'identity', fill = 'pink')
+    }
+    
+    g = g +
+    coord_flip() +
+    labs(x = ' ', y = ' ') +
+    theme_fivethirtyeight() +
+    theme(axis.text.x = element_blank())
+    
+    g
+   
+  })
+  
+  output$top_tracks = renderPlot({outputR()})
+}
+
+shinyApp(ui = ui, server = server)
+
+```
+
+<iframe src=> </iframe>
+<iframe width="" height="400" scrolling="no" frameborder="no"  src="https://malvika.shinyapps.io/spotifyshiny/" allowfullscreen = true> </iframe>
+

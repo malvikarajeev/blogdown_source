@@ -1,0 +1,242 @@
+---
+title: "uber data"
+author: "Malvika Rajeev"
+date: "2/22/2020"
+output: html_document
+---
+
+
+
+<div id="requesting-data-from-uber" class="section level2">
+<h2>requesting data from uber</h2>
+<p>The purpose of this exercise is to visualise how I use my uber data. Uber records are pretty useful - just ask uber to email you your data: <a href="https://help.uber.com/driving-and-delivering/article/request-your-personal-uber-data?nodeId=fbf08e68-65ba-456b-9bc6-1369eb9d2c44" class="uri">https://help.uber.com/driving-and-delivering/article/request-your-personal-uber-data?nodeId=fbf08e68-65ba-456b-9bc6-1369eb9d2c44</a></p>
+<p>I’m removing remore 2020 and 2015 (it contains only one day) for now becuase it might skew the data.</p>
+</div>
+<div id="reading-in-the-data" class="section level2">
+<h2>reading in the data</h2>
+<pre class="r"><code>myrides = read.csv(&quot;https://raw.githubusercontent.com/malvikarajeev/uberAnalysis/master/trips_data.csv&quot;)
+
+head(myrides)</code></pre>
+<pre><code>##          City Product.Type Trip.or.Order.Status
+## 1 Los Angeles        UberX            COMPLETED
+## 2 Los Angeles        UberX            COMPLETED
+## 3 Los Angeles        UberX            COMPLETED
+## 4 Los Angeles        UberX            COMPLETED
+## 5 Los Angeles        UberX            COMPLETED
+## 6 Los Angeles        UberX      DRIVER_CANCELED
+##                    Request.Time               Begin.Trip.Time
+## 1 2020-02-17 04:43:38 +0000 UTC 2020-02-17 04:52:00 +0000 UTC
+## 2 2020-02-17 01:17:06 +0000 UTC 2020-02-17 01:19:19 +0000 UTC
+## 3 2020-02-16 20:29:34 +0000 UTC 2020-02-16 20:35:00 +0000 UTC
+## 4 2020-02-16 18:45:42 +0000 UTC 2020-02-16 18:51:31 +0000 UTC
+## 5 2020-02-16 00:17:16 +0000 UTC 2020-02-16 00:23:12 +0000 UTC
+## 6 2020-02-15 23:36:22 +0000 UTC 1970-01-01 00:00:00 +0000 UTC
+##   Begin.Trip.Lat Begin.Trip.Lng
+## 1       34.08361      -118.3521
+## 2       33.99775      -118.4748
+## 3       33.96174      -118.3673
+## 4       33.98221      -118.4594
+## 5       34.01283      -118.4966
+## 6       34.01028      -118.4934
+##                                 Begin.Trip.Address
+## 1      7422 Melrose Ave, Los Angeles, CA 90046, US
+## 2               423 Rose Ave, Venice, CA 90291, US
+## 3   621 W Manchester Blvd, Inglewood, CA 90301, US
+## 4 4100 Admiralty Way, Marina del Rey, CA 90292, US
+## 5         111 Broadway, Santa Monica, CA 90401, US
+## 6                                                 
+##                    Dropoff.Time Dropoff.Lat Dropoff.Lng
+## 1 2020-02-17 05:01:35 +0000 UTC    34.09819   -118.3077
+## 2 2020-02-17 01:29:59 +0000 UTC    33.98216   -118.4595
+## 3 2020-02-16 20:55:09 +0000 UTC    33.97935   -118.4664
+## 4 2020-02-16 19:07:13 +0000 UTC    33.96225   -118.3671
+## 5 2020-02-16 00:46:38 +0000 UTC    33.98220   -118.4595
+## 6 1970-01-01 00:00:00 +0000 UTC    34.01351   -118.4972
+##                                                                                Dropoff.Address
+## 1                                                5419 W Sunset Blvd, Los Angeles, CA 90027, US
+## 2                                             4100 Admiralty Way, Marina del Rey, CA 90292, US
+## 3 Venice Beach Pier Public Parkingl Lot, Unnamed Road, Marina Del Rey, CA 90292, United States
+## 4                                               621 W Manchester Blvd, Inglewood, CA 90301, US
+## 5                                             4100 Admiralty Way, Marina del Rey, CA 90292, US
+## 6                                             4100 Admiralty Way, Marina del Rey, CA 90292, US
+##   Distance..miles. Fare.Amount Fare.Currency
+## 1             3.56        9.14           USD
+## 2             2.21        7.43           USD
+## 3             7.27       11.65           USD
+## 4             7.24       10.63           USD
+## 5             3.81       10.30           USD
+## 6             0.00        5.00           USD</code></pre>
+<pre class="r"><code>myrides$completed = ifelse(myrides$Trip.or.Order.Status == &#39;COMPLETED&#39;, T, F)
+
+##basic eda
+
+myrides$time_started = as.POSIXct(strptime(myrides$Begin.Trip.Time, &quot;%Y-%m-%d %H:%M:%S&quot;))
+
+myrides$year = year(myrides$time_started)
+##remove 1970 and not completed
+
+myrides = myrides %&gt;% filter(!(year == 1970 | year == 2020 | year == 2015))
+myrides = myrides %&gt;% filter(Product.Type != &#39;UberEATS Marketplace&#39;)
+myrides = myrides %&gt;% filter(completed == T)
+myrides$month_year = format(as.Date(myrides$Begin.Trip.Time), &quot;%Y-%m&quot;)</code></pre>
+<pre class="r"><code>ggplot(myrides, aes(x = month_year)) + 
+  geom_bar(aes(fill = as.factor(year))) + 
+  scale_fill_brewer(palette=&quot;Set1&quot;) +
+  theme_tufte() +
+  theme(axis.text.x = element_blank()) + 
+  labs(y = &#39;Frequency of Rides&#39;, x = &#39;Time Period&#39;) +
+  scale_fill_discrete(name = &quot;Year&quot;)</code></pre>
+<pre><code>## Scale for &#39;fill&#39; is already present. Adding another scale for &#39;fill&#39;,
+## which will replace the existing scale.</code></pre>
+<p><img src="/malvikarajeev.github.io/post/uberAnalysis/uberAnalysis_files/figure-html/prelim-1.png" width="672" /></p>
+<p>Seems like on an avergae I took about 10-20 rides a month, seemingly growing with every year. there seems to be a coherent pattern in that number of rides increase monotically as we move from January to February (except for in 2018). The month of September-November seems generally low.</p>
+<p>Now, I moved from New Delhi, India, to Berkeley, California, in the month of August, 2018. Can we see this move reflect different patterns?</p>
+</div>
+<div id="average-trip-time." class="section level2">
+<h2>average trip time.</h2>
+<pre class="r"><code>myrides$time_ended = as.POSIXct(strptime(myrides$Dropoff.Time, &quot;%Y-%m-%d %H:%M:%S&quot;))
+myrides$duration_mins = myrides$time_ended - myrides$time_started
+myrides$duration_mins = as.integer(myrides$duration_mins)
+
+ggplot(myrides, aes(y = duration_mins, x = month_year)) + geom_boxplot() +
+  theme_tufte() +
+  theme(axis.text.x = element_blank()) + 
+  labs(y = &#39;Distribution of Rides&#39;, x = &#39;Time Period&#39;) +
+  scale_fill_discrete(name = &quot;Year&quot;)</code></pre>
+<p><img src="/malvikarajeev.github.io/post/uberAnalysis/uberAnalysis_files/figure-html/avg_time-1.png" width="672" /></p>
+<p>The average time of my rides is decreasing: perhaps it makes sense, the traffic in New Delhi is insane comapred to the traffic in Berkeley.</p>
+</div>
+<div id="fare-habits" class="section level2">
+<h2>fare habits</h2>
+<p>I wanted to group by year, and get the cumulative fare for each year by month. In the pursuit of this, I found a function called <code>ave</code></p>
+<pre class="r"><code>fare_wise = function(currency){
+  fares = myrides %&gt;%
+          filter(Fare.Currency == currency) %&gt;%
+          group_by(year, month_year) %&gt;% 
+          summarise(monthly_fare = sum(Fare.Amount, na.rm = T))
+  fares$cumulative_fare = ave(fares$monthly_fare, fares$year, FUN = cumsum)
+  return(fares)
+}
+
+inr = fare_wise(&#39;INR&#39;)
+##Adding year
+
+##
+
+
+ggplot(inr) +
+  geom_point(aes(y = cumulative_fare, x = month_year, color = factor(year))) + 
+  theme_tufte() +
+  transition_states(year, wrap = T) </code></pre>
+<p><img src="/malvikarajeev.github.io/post/uberAnalysis/uberAnalysis_files/figure-html/animation1-1.gif" /><!-- --></p>
+<pre class="r"><code>  # labs(title = &quot;Year: {frame_time}&quot;) +
+  # view_follow(fixed_x = T)
+
+# anim_save(&quot;inr.gif&quot;, animation = gg, path = &quot;/figures&quot;)</code></pre>
+<!-- ![Spending Habits](/figures/inr.gif) -->
+<p>What the hell was I doing in 2017… damn.</p>
+<pre class="r"><code>temp = myrides %&gt;% filter(Begin.Trip.Lat * Begin.Trip.Lng != Dropoff.Lat*Dropoff.Lng) %&gt;% filter(Fare.Currency == &#39;USD&#39;)
+
+
+
+usa_map = map_data(&quot;county&quot;)
+
+ca_df &lt;- usa_map %&gt;% filter(region == &#39;california&#39;)
+
+# ggplot() + 
+#   geom_polygon(data = ca_df, aes(x=long, y = lat)) +
+#   coord_fixed(1.3) +
+#   geom_curve(data=temp,
+#              aes(x=Begin.Trip.Lng, y=Begin.Trip.Lat, xend=Dropoff.Lng, yend=Dropoff.Lat),
+#              col = &quot;#b29e7d&quot;, size = 1, curvature = .2) +
+#   geom_point(data=temp,
+#              aes(x=Dropoff.Lng, y=Dropoff.Lat), 
+#              colour=&quot;blue&quot;,
+#              size=1.5) +
+#   geom_point(data=temp,
+#              aes(x=Begin.Trip.Lng, y=Begin.Trip.Lat), 
+#              colour=&quot;blue&quot;) +
+#   theme(axis.line=element_blank(),
+#         axis.text.x=element_blank(),
+#         axis.text.y=element_blank(),
+#         axis.title.x=element_blank(),
+#         axis.title.y=element_blank(),
+#         axis.ticks=element_blank(),
+#         plot.title=element_text(hjust=0.5, size=12))</code></pre>
+<pre class="r"><code>library(shiny)
+library(ggmap)
+library(ggplot2)
+
+ui &lt;- fluidPage(
+  titlePanel(&quot;My Uber Rides&quot;),
+  
+  sidebarLayout(
+    # sidebarPanel(
+    #   radioButtons(&quot;radio&quot;, label = h4(&quot;Choose currency&quot;),
+    # choices = list(&quot;USD&quot; = &#39;USD&#39;, &quot;INR&quot; = &#39;INR&#39;)), 
+    
+      # radioButtons(&quot;interval&quot;, label = h4(&quot;show time of day?&quot;),
+      #              choices = list(&quot;Yes&quot; = TRUE, &quot;No&quot; = FALSE)),
+
+      
+      selectInput(&quot;month_year&quot;, label = &quot;Choose Month and Year&quot;,
+                  choices = unique(temp$month_year)),
+                 
+      
+      sliderInput(&quot;duration_ride&quot;, &quot;Duration of Rides&quot;, min = 1, max = max(temp$duration), value = c(1,10))
+    ),
+    
+    mainPanel(plotOutput(outputId = &quot;my_map&quot;)
+    
+  )
+)
+)
+
+#load()
+
+server &lt;- function(input, output) {
+  
+  outputR = reactive({
+    req(input$duration_ride)
+    req(input$month_year)
+    temp2 = temp%&gt;% filter(duration_mins &lt;= input$duration_ride[2] &amp; duration_mins &gt;= input$duration_ride[1]) %&gt;% filter(month_year == input$month_year)
+    
+    
+    usa_map = map_data(&quot;county&quot;)
+
+    ca_df &lt;- usa_map %&gt;% filter(region == &#39;california&#39;)
+  long = mean(temp2$Dropoff.Lng, na.rm = T)
+  latt = mean(temp2$Dropoff.Lat, na.rm = T)
+  g = ggmap(get_googlemap(c(long, latt),
+                    zoom = 15 , scale = 2,
+                    maptype =&#39;roadmap&#39;,
+                    color = &#39;color&#39;, archiving = T)) +
+    
+    geom_segment(data=temp2,
+              aes(x=Begin.Trip.Lng, y=Begin.Trip.Lat, xend=Dropoff.Lng, yend=Dropoff.Lat),
+              col = &quot;black&quot;, size = 0.3, arrow = arrow()) +
+  geom_point(data=temp2,
+             aes(x=Dropoff.Lng, y=Dropoff.Lat, 
+             colour=&quot;red&quot;),
+             alpha = 0.5) +
+  geom_point(data=temp2,
+             aes(x=Begin.Trip.Lng, y=Begin.Trip.Lat, 
+             colour=&quot;blue&quot;), alpha = 0.5) + 
+    scale_color_identity(
+                          breaks = c(&quot;red&quot;, &quot;blue&quot;),
+                          labels = c(&quot;Drop off Point&quot;, &quot;Pick up point&quot;),
+                          guide = &quot;legend&quot;) 
+    
+    
+  
+  g
+   
+  })
+  
+  output$my_map= renderPlot({outputR()})
+}
+
+shinyApp(ui = ui, server = server)</code></pre>
+<iframe width height="400" scrolling="no" frameborder="no" src="https://malvika.shinyapps.io/ubershiny/" allowfullscreen="true">
+</iframe>
+</div>

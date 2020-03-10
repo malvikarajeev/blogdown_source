@@ -1,0 +1,330 @@
+---
+title: "Rainfall in New Delhi, India: 1901 - 2015"
+author: "Malvika Rajeev"
+
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+*This analysis was understaken as a part of Cal's Analysis of Time Series class.*
+
+##Dataset
+
+From Kaggle, I downloaded the dataset for rainfall in India from 1901 to 2015, and filtered it to get data only for the city of New Delhi. Then, I made two time series for inital inspection: An annual one, and a monthly one. Since India a tropical country, rainfall is highly seasonal, so it makes sense to retain the monthly data.
+
+
+```{r, warning = FALSE, message = FALSE}
+library(data.table)
+library(forecast)
+library(ggplot2)
+library(astsa)
+rainIndia <- fread("https://raw.githubusercontent.com/malvikarajeev/misc/master/rainfall%20in%20india%201901-2015.csv")
+rainDelhi <- rainIndia[SUBDIVISION == "HARYANA DELHI & CHANDIGARH"]
+rainDelhi$total <- rowSums(rainDelhi[,c(3:14)])
+rain_seasonal <- t(as.matrix(rainDelhi[,c(3:14)]))
+rain_seasonal <- unlist(as.list(rain_seasonal))
+
+rain_month <- as.data.frame(rain_seasonal)
+names(rain_month) <- "rain"
+
+
+
+delhiTs <- rainDelhi[,c(2,20)]
+
+head(delhiTs)
+
+```
+
+
+
+
+
+Now, to convert the data to a time series object in R.
+
+###Summary Statistics
+
+```{r warning = FALSE, message = FALSE}
+
+
+rain <- ts(delhiTs$total, start = c(1901))
+rainbymonth <- ts(rain_seasonal, start = c(1901), frequency = 12)
+
+plot.ts(rain, main = "Rainfall by Year")
+
+plot.ts(rainbymonth, main = "Rainfall by Month over the Years")
+```
+
+When we view the aggregate annual data, there does seem to be some random fluctuations over time, but they seem consistent. 
+When we view the monthly data over the years, there is clearly a seasonal component. Therefore it becomes a time series with **frequency of 12.**
+
+###Comparing monthly mean rainfall 
+
+```{r warning = FALSE, message = FALSE}
+monthmean <- data.table(1:12)
+monthmean$mean <- colMeans(rainDelhi[,3:14])
+names(monthmean)[1] <- "month"
+annualmean <- mean(rainbymonth)
+ggplot() +
+  geom_line(data = monthmean, aes(x = month, y = mean)) +
+  geom_point(data = monthmean, aes(x = month, y = mean), color = "blue") + 
+  geom_hline(yintercept = annualmean, linetype="dashed") +
+  labs(title = "Mean Monthly Rainfall", x = "Month", y = "Rainfall") +
+  theme_classic()
+
+```
+
+
+It is very clear that the months of July and June have a very high amount of rainfall, and so excluding theese two months, the rest of the months seem to have low variance around their mean. 
+Monthly analysis of rainfall indicates that the region has very
+little or no change in non-monsoon months of January, February, March, November and December.
+
+```{r warning = FALSE, message = FALSE}
+#Periodogram
+spectrum(rainbymonth, log = "no")
+spectrum(rainDelhi$ANNUAL)
+
+```
+
+Generally speaking, if a time series appears to be smooth, then the values of the
+periodogram for low frequencies will be large relative to its other values and we will say that the data set has an excess of low frequency.
+
+1. If a time series has a strong sinusoidal signal for some frequency,
+then there will be a peak in the periodogram at that frequency.
+2. If a time series has a strong nonsinusoidal signal for some frequency,
+then there will be a peak in the periodogram at that frequency but
+also peaks at some multiples of that frequency. The first frequency (10  in this case) is called the fundamental frequency and the others called harmonics. 
+
+###Smoothening
+
+
+```{r warning = FALSE, message = FALSE}
+library(ggplot2)
+rain_month$time_period <- seq(from = as.Date("1/1/1901", "%d/%m/%Y"), to = as.Date("31/12/2015", "%d/%m/%Y"), by = "month")
+
+
+##SMOOTHENING: LOESS
+
+decomp_2 <- ggplot(rain_month, aes(x = time_period, y = rain)) +
+  geom_line() +
+  geom_smooth(method = "loess", se = FALSE, span = 0.2, aes(colour = "h=0.2")) +
+  geom_smooth(method = "loess", se = FALSE, span = 0.4, aes(color = "h=0.4")) +
+  geom_smooth(method = "loess", se = FALSE, span = 0.6, aes(color = "h=0.6")) +
+  geom_smooth(method = "loess", se = FALSE, span = 0.8, aes(color = "h=0.8")) +
+  geom_smooth(method = "loess", se = FALSE, span = 1, aes(color = "h=1")) +
+  scale_colour_manual("", 
+                      breaks = c("h=0.2","h=0.4","h=0.6","h=0.8","h=1"),
+                      values = c("red", "green", "blue","yellow","brown")) +
+  xlab(" ") +
+  labs(title="Different LOESS parameters") +
+  theme_classic()
+decomp_2
+
+```
+
+It is clear that LOESS smoothening is giving us a biased curve for all values of the parameter.
+
+
+###Is the Series Stationary?
+
+Making a time series stationary is required to fit a seasonal ARIMA model. 
+A stationary time series in one which the mean and variances level remains near-constant, and the choice of time origin doesn't change the overall movement of the time series. 
+A time series has a trend, seasonal, and random part. A seasonal part of this time series obviously exists. Now, to determine the trend part.
+
+```{r warning = FALSE, message = FALSE}
+reg <- lm(ANNUAL ~ YEAR, rainDelhi)
+
+rain_yearly <- ggplot(rainDelhi) +
+                    geom_line(aes(x = YEAR, y = ANNUAL)) +
+                    geom_abline(intercept = 646, slope = -0.059) +
+                    theme_classic()
+rain_yearly
+
+```
+
+
+
+VARIANCE around mean is 20215.02.
+The slope of the annual time series is -0.5 mm / 10 years, giving about
+a decrease of aprx 6.8 in the time period from 1901 to 2015.
+
+I used Kwiatkowski-Phillips-Schmidt-Shin (KPSS) to determine stationarity, and the Mann-Kendall test for monotonic trend detection. 
+
+```{r warning = FALSE, message = FALSE}
+library(trend)
+library(tseries)
+adf.test(rainbymonth)
+kpss.test(rainbymonth, null="Trend")$p.value
+
+kpss.test(rainbymonth, null="Level")$p.value
+
+#stationarise
+rainComponents <- decompose(rainbymonth)
+plot(rainComponents)
+rain_stat <- rainbymonth - rainComponents$seasonal
+plot(rain_stat, main = "monthy rain without seasonal component")
+
+##kendal test for trend result, for annual rainfall and monthly. 
+library(trend)
+
+
+
+kendall <- mk.test(rainDelhi$ANNUAL)
+kendall$pvalg
+kendall2 <- mk.test(rainbymonth)
+kendall2$pvalg
+
+cat("there there is no monotonic trend in the annual rainfall data") 
+
+```
+
+
+
+After performing the Ljung-Box test for stationarity, I concluded that the monthly rain data is not sufficiently stationary. So I subtracted the seasonal part. After that, the test yields an acceptable p-value.
+
+
+
+
+```{r warning = FALSE, message = FALSE}
+
+boxtest <- Box.test(rainbymonth, lag = 12)
+boxtest$p.value
+
+##stationarise time series by removing seasonal part
+
+rain_stat <- rainbymonth - rainComponents$seasonal
+Box.test(rain_stat, lag = 12, type = "Ljung-Box")
+
+```
+
+
+###Seasonal Differencing
+
+The seasonal difference of a time series is the series of changes from one season to the next. For monthly data, in which there are 12 periods in a season, the seasonal difference of Y at period t is $Y_t - Y_{t-12}$. 
+
+
+
+```{r warning = FALSE, message = FALSE}
+boxplot(rainbymonth~cycle(rainbymonth))
+acf(rainbymonth)
+pacf(rainbymonth)
+```
+
+
+Seasonal effect becomes apparent.
+Even though the mean value of each month apart from the june and july is quite different their variance is small. Hence, we have strong seasonal effect with a cycle of 12 months or less. 
+The time series data should be seasonally differenced, (due to a few spikes in both the ACF and PACF that cut the 95% confidence limits), by order D=1, in order to eliminate seasonality.
+
+```{r warning = FALSE, message = FALSE}
+rain_ts <- rainbymonth
+
+rainbymonth <- window(rain_ts, end = c(2004,12))
+raincheck <- window(rain_ts, start = c(2005,1))
+
+
+rain_diff <- diff(rainbymonth,36, difference = 1)
+rain_stat_diff <- diff(rain_stat, 36, difference =1)
+
+Acf(rain_diff, lag.max = 50, main = "ACF after seasonal differencing")
+
+Pacf(rain_diff, lag.max = 50, main = "PACF after seasonal differencing")
+```
+
+On inspection, it seems like a SARIMA model with seasonal parameters:
+
+1. AR = 1 or 0
+2. MA = 1 or 0
+
+and non seasonal parameters:
+
+1. AR = 0
+2. MA = 1 or 2
+
+So we run this model , and get the auto.arima model and compare results. The auto.arima model suggested $(0,0,0,2,1,1)_{12}$.
+
+###Model Fit
+
+```{r warning = FALSE, message = FALSE}
+
+library(astsa)
+model_1 <- sarima(rainbymonth, 1,0,1,1,1,1,12)
+model_2 <- sarima(rainbymonth, 0,0,0,2,1,0,12)
+model_1
+model_2
+
+auto.arima(rainbymonth, trace=TRUE, seasonal = TRUE)
+
+##predicting
+prediction_1 <- sarima.for(rainbymonth, 132,1,0,1,1,1,1,12)
+prediction_2 <- sarima.for(rainbymonth, 132,0,0,0,2,1,0,12)
+
+
+library(forecast)
+#fit <- auto.arima(rainbymonth,max.p = 5,max.q = 5,max.P = 5,max.Q = 5,max.d = 3,seasonal = TRUE,ic = 'aicc')
+#plot(forecast(fit,h=20))
+#hist(fit$residuals)
+```
+
+A fitted model should be subjected to diagnostic checking with a view to ascertaining its goodness-of-fit to the data. This is done by analysing its residuals. An adequate model should have uncorrelated residuals. This is the minimal condition. The optimal condition is that the residuals should follow a Gaussian distribution with mean zero. The residuals resemble white noise which is a good indication.
+
+
+Now I plot the actual values predictied from 1901 - 2004 for 2005-2015 against the actual data of 2005-2015.
+
+```{r warning = FALSE, message = FALSE}
+format <- function(x) {
+  temp <- unlist(as.list(t(as.matrix(x))))
+  temp <- as.data.table(temp)
+  temp$time <- 1:nrow(temp)
+  return(temp)
+}
+             
+predict_1 <-format(prediction_1$pred)
+predict_2 <- format(prediction_2$pred)
+raincheck <- format(raincheck)
+
+##prediction frame:
+predict_1$se <- unlist(as.list(t(as.matrix(prediction_1$pred))))
+predict_1$lower <- predict_1$temp - 1.96*predict_1$se
+predict_1$upper <- predict_1$temp + 1.96*predict_1$se
+                                
+
+ggplot() +
+  geom_line(data = predict_1,aes(x=time,y = temp, colour = "model1")) +
+  geom_line(data = predict_2,aes(x=time,y = temp, colour = "model2")) +
+  geom_line(data = raincheck,aes(x=time,y = temp, colour = "truth")) +
+    scale_colour_manual("", 
+                        breaks = c("model1","model2","truth"),
+                        values = c("red", "green", "blue")) +
+    geom_ribbon(data=predict_1,aes(x = time,ymin=lower,ymax=upper),alpha=0.3) +
+    labs(title="Prediction v Truth with 95% confidence bands") +
+    theme_classic()
+```
+
+
+The predictions seem not too far from the truth, and within the confidence intervals. The AIC's for the SARIMA models are almost identical. 
+
+
+###Conclusion:
+
+1. Rainfall in Delhi is highly seasonal, with peak during July and June.
+
+2. There is no ascertainable overall monotonic trend in the data.
+
+3. Series can be made sufficiently stationary by subtracting the seasonal component, and by differencing (degree 1) over a frequency of 12 months. 
+
+4. SARIMA models are adequate in predicting weather forecasts.
+
+
+
+
+
+
+
+
+
+
+
+
+

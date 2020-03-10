@@ -1,0 +1,1089 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts | what dat data do?</title>
+    <link>/post/</link>
+      <atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    <description>Posts</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language>
+    <image>
+      <url>/img/cover_photo.jpg</url>
+      <title>Posts</title>
+      <link>/post/</link>
+    </image>
+    
+    <item>
+      <title></title>
+      <link>/post/linguistic-survey-data-can-we-detect-regionalities/lab2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>/post/linguistic-survey-data-can-we-detect-regionalities/lab2/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Linguistic Data Analysis</title>
+      <link>/post/linguistic-survey-data-can-we-detect-regionalities/linguisticsurvey/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>/post/linguistic-survey-data-can-we-detect-regionalities/linguisticsurvey/</guid>
+      <description>
+
+
+
+&lt;p&gt;&lt;em&gt;This data analysis was undertaken as a part of the Cal’s Stat 215A.&lt;/em&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##Please set path before running: path to where the main data is
+
+##libraries:
+library(kableExtra)
+library(dbscan)
+library(factoextra)
+library(fastcluster)
+library(FactoMineR)
+library(NbClust)
+library(tidyverse)
+library(magrittr)
+library(cluster)
+library(cowplot)
+library(NbClust)
+library(clValid)
+library(ggfortify)
+library(clustree)
+library(dendextend)
+library(factoextra)
+library(FactoMineR)
+library(corrplot)
+library(GGally)
+library(knitr)
+library(kableExtra)
+library(gplots)
+library(wesanderson)
+library(ggplot2)
+library(tidyverse)
+library(maps)
+library(crosstalk)
+library(readr)
+library(gridExtra)
+library(leaflet)
+library(MASS)
+library(Rtsne)
+library(irlba)
+
+state_df &amp;lt;- map_data(&amp;quot;state&amp;quot;)
+
+my_map_theme &amp;lt;- theme_void()
+
+
+# load the data
+ling_data &amp;lt;- read.table(&amp;quot;https://raw.githubusercontent.com/malvikarajeev/linguisticSurvey/master/lingData.txt&amp;quot;, header = T)
+ling_location &amp;lt;- read.table(&amp;quot;https://raw.githubusercontent.com/malvikarajeev/linguisticSurvey/master/lingLocation.txt&amp;quot;, header = T)
+# question_data contains three objects: quest.mat, quest.use, all.ans
+
+
+library(repmis)
+source_data(&amp;quot;https://github.com/malvikarajeev/linguisticSurvey/blob/master/question_data.RData?raw=true&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;quest.mat&amp;quot; &amp;quot;quest.use&amp;quot; &amp;quot;all.ans&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;answers &amp;lt;- all.ans[50:122]
+
+####USING PACKAGE ZIPCODE
+library(zipcode)
+data(&amp;quot;zipcode&amp;quot;)
+###changing ZIPs to add a zero
+zip &amp;lt;- ling_data$ZIP
+zip &amp;lt;- as.character(zip)
+for(i in 1:length(zip)) {
+  if(as.numeric(zip[i]) &amp;lt; 10000){
+    zip[i] &amp;lt;- paste0(&amp;quot;0&amp;quot;, zip[i])
+  }
+}
+
+ling_data$ZIP &amp;lt;- zip
+t2 &amp;lt;- merge(ling_data,zipcode, by.x = &amp;#39;ZIP&amp;#39;, by.y = &amp;#39;zip&amp;#39;)
+
+t2 &amp;lt;- t2[, -c(2:4, 72, 73)]
+
+names(t2)[69:72] &amp;lt;- c(&amp;quot;CITY&amp;quot;, &amp;quot;STATE&amp;quot;, &amp;quot;lat&amp;quot;, &amp;quot;long&amp;quot;)
+
+ling_data &amp;lt;- t2
+
+l &amp;lt;- length(all.ans)
+
+structure &amp;lt;- matrix(numeric(l*2), l,2)
+for (i in 1:l){
+  
+  temp &amp;lt;- all.ans[[i]]
+  structure[i,1] &amp;lt;- temp$qnum[1]
+  structure[i,2] &amp;lt;- length(temp$ans.let)
+}
+
+
+structure &amp;lt;- as.data.frame(structure)
+names(structure) &amp;lt;- c(&amp;#39;ques.num&amp;#39;, &amp;#39;number_choices&amp;#39;)
+
+#so one person has 73 responses.
+#for every response, structure$number_choices tells us which response it is. 
+
+##missing: 112, 113, 114, 116, 122
+
+
+struc &amp;lt;- structure[50:122,]
+struc &amp;lt;- struc[-c(63:65,67,73),]
+struc &amp;lt;- struc[-59,]
+
+#source(&amp;quot;/Users/malvikarajeev/Desktop/stat215/stat-215-a/lab2/R/clean.R&amp;quot;)
+dummy &amp;lt;- ling_data[,-c(1, 69:72)]
+
+names(dummy) &amp;lt;- struc$ques.num
+answer_no &amp;lt;- struc$number_choices
+N &amp;lt;- nrow(ling_data)
+
+l &amp;lt;- as.data.frame(matrix(numeric(N), N))
+
+for (i in 1:length(names(dummy))){
+  df &amp;lt;- dummy[i]
+  names(df) &amp;lt;- &amp;quot;answers&amp;quot;
+  df$recode &amp;lt;- list(rep(0, answer_no[i]))
+  df$recode &amp;lt;- Map(function(x,y) `[&amp;lt;-`(x,y,1), x = df$recode, y = df$answers)
+  
+  temp &amp;lt;- data.frame(matrix(unlist(df$recode), nrow=length(df$recode), byrow=T))
+  l &amp;lt;- c(l, temp)
+}
+l &amp;lt;- data.frame(l)
+
+l &amp;lt;- l[,-1]
+
+
+
+#binary &amp;lt;- read.csv(&amp;quot;~/Desktop/stat215/stat-215-a/lab2/data/binary.csv&amp;quot;)
+#binary &amp;lt;- binary[,-1] ##serial numbers
+binary &amp;lt;- l
+
+########################################################
+##fix the column  names using structure
+##creating a column on vector names
+
+create_names &amp;lt;- function(x) {
+  return(lapply(x$number_choices, function(x) {seq(1:x)}))
+}
+
+names_col &amp;lt;- create_names(struc)
+names_ans &amp;lt;- unlist(sapply(1:67, function(x) {paste(struc$ques.num[[x]], names_col[[x]], sep = &amp;quot;_&amp;quot;)}))
+
+names(binary) &amp;lt;- names_ans
+
+######################################################
+
+binary$lat &amp;lt;- ling_data$lat
+binary$long &amp;lt;- ling_data$long
+binary$id &amp;lt;- ling_data$ID
+binary$city &amp;lt;- ling_data$CITY
+binary$state &amp;lt;- ling_data$STATE
+
+##keeping first three zips of dataframe
+
+binary$zip &amp;lt;- substr(as.character(ling_data$ZIP),1,nchar(ling_data$ZIP) - 2)
+
+##clear out indivudals who didnt answer all the questions
+
+binary &amp;lt;- binary[rowSums(binary[,1:468]) == 67,]
+
+###########################BY ZIP
+##group by . have to remove: state, zip, city, lat, long
+ 
+
+
+
+temp &amp;lt;- binary[, -(469:472)]
+
+by_zip &amp;lt;- temp %&amp;gt;% group_by(zip) %&amp;gt;% summarise_all(sum)
+
+##to add columns for lat,long, stat etc, we group ling_data by zip, 
+#and then report the MODE of each of the required columns
+#group by city, get the first state, most frequent occuring city, and most frequent occuring lat and log
+#to make it easier will moduralise it:##na.last =NA removes NAs
+
+ling_data$newZIP &amp;lt;- substr(as.character(ling_data$ZIP), 1, nchar(ling_data$ZIP) - 2)
+
+get_mode &amp;lt;- function(x) {
+  #return(names(sort(table(x, use.NA = &amp;#39;always&amp;#39;), decreasing = T, na.last = T)[1]))
+  #return(which.max(tabulate(x)))
+  ux &amp;lt;- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+temp &amp;lt;- ling_data %&amp;gt;% group_by(newZIP) %&amp;gt;% summarise(state = get_mode(STATE), city = get_mode(CITY),
+                                                     lat = get_mode(as.numeric(lat)), long = get_mode(as.numeric(long)))
+
+
+##by_zip_ll has all the added columns
+
+by_zip_ll &amp;lt;- merge(by_zip, temp[,c(&amp;quot;lat&amp;quot;,&amp;quot;long&amp;quot;, &amp;quot;newZIP&amp;quot;,&amp;quot;state&amp;quot;,&amp;quot;city&amp;quot;)], 
+                   by.x = &amp;#39;zip&amp;#39;, by.y = &amp;#39;newZIP&amp;#39;, all.x = T)
+
+##adding state info using data(states)
+by_zip_ll$state &amp;lt;- as.character(by_zip_ll$state)
+
+data(state)
+state_info &amp;lt;- data.frame(stringsAsFactors = F, state.abb, 
+                         state.region)
+
+by_zip_ll &amp;lt;- merge(by_zip_ll, state_info, by.x = &amp;quot;state&amp;quot;, by.y = &amp;quot;state.abb&amp;quot;) 
+
+##finally, remove hawaki and alaska
+
+by_zip_ll &amp;lt;- by_zip_ll %&amp;gt;% filter(!(state == &amp;#39;AK&amp;#39; | state == &amp;#39;HI&amp;#39;))
+
+just_zip &amp;lt;- by_zip_ll
+##let&amp;#39;s change frequenceies to relative frequencies for PCA and KMEANS, DBSCAN ETC.
+
+temp &amp;lt;- by_zip_ll[,-c(1,2, 471:747)]
+
+
+
+temp &amp;lt;- t(apply(temp, 1, function(i) i/sum(i))) ##transpose because R populates by column
+
+##sanity check
+#rowSums(temp)
+
+by_zip_ll[,-c(1,2, 471:747)] &amp;lt;- temp&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;introduction&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;The study of aggregate linguistic properties over spatial variation is called dialectometry, a sub branch of dialectology: the study of dialects. As language variation is complex, both geographically and dynamically, computational techniques, that can deal with large amounts of granular data, and statistic tehcniques, that can help make inferences from this data, are pivotal for the advancement of dialectometry.&lt;/p&gt;
+&lt;p&gt;In 2003, a dialect survey was condcted as part of an expansion of an initiative started by Professor Bert Vaux at Harvard University. The Dialect Survey uses a series of questions, including rhyming word pairs and vocabulary words, to explore words and sounds in the English language. The survey was conducted to obtain a contemporary view of American English dialectal variation. It started as an online survey, with a final tally of around 47,000 respondents. For this report, we’re interested in the lexical-variant questions, rather than phoenetical variation.&lt;/p&gt;
+&lt;p&gt;By analysing the responses to these questions, we are interested in investigating some geographical structure that might be present in this data. In this report, we’ll explore some dimension reduction methods, and also use some clustering methods to cluster observations into geographically-meaningful groups, using k-means and hierarchical bipartite spectral clustering.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;dataset&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Dataset&lt;/h1&gt;
+&lt;p&gt;The survey dataset contains a set of 122 questions. Each question has around 47,000 responses. For our analyses and clustering, we group the data the first 3 digits of the respondents ZIP code. U.S. ZIP Code Areas (Three-Digit) represents the first three digits of a ZIP Code. The first digit of a five-digit ZIP Code divides the United States into 10 large groups of states numbered from 0 in the Northeast to 9 in the far West.&lt;/p&gt;
+&lt;p&gt;Within these areas, each state is divided into an average of 10 smaller geographical areas, identified by the second and third digits. These digits, in conjunction with the first digit, represent a sectional center facility or a mail processing facility area.&lt;/p&gt;
+&lt;p&gt;There are around ~800 such areas. Each question has a varying degree of possible responses, summarised in ‘answers’ data. Each row represents an individuals reponse, along with their city, state and ZIP, although this was user input so is extremely essy (specially the city). The main dataset, ‘ling_data’ contains this information. In the data cleaning section, I will explain how we sufficied through these challenges.&lt;/p&gt;
+&lt;div id=&#34;data-cleaning&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Data Cleaning&lt;/h2&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;The first step was to fix the ling_data. I used the package ‘zipcode’, which has all the unique zipcodes of United States, along with the corresponding city and State. Before merging ling_data with this dataset, I had to add a leading ‘0’ before the 4 digit ZIPs. After merging on the zip code, I was able to remove all the messy entries of ‘cities’ and ‘states’.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;After that, I subsetted the data to our questions of interests, i.e the lexical questions. Then, I changed the ~47,000 x 67 categorical response matrix to a ~47,000 x 468 binary matrix. To illustrate: Question 65 has 6 options. If person A picked option 4, their corresponding entry would become (0,0,0,1,0,0). I also changed the column names to the answer options.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Then, I removed all respondents who hadn’t answered all the questions, that is, their rows in the binary matrix did not sum to 67. This is to avoid skewing the data.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Next, I grouped by the 3-digit zip column by adding all the responses and selecting the mode of city, state, latitude and longitude within that zipcode. I removed Alaska and Hawaii from the dataset to make graphical representation easier.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Finally, I kept two dataframes for analyses, the one described above, and one in which I scale every observation within that zip by total observations in the zip. This is to normalise zips with too many or too few respondents.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div id=&#34;exploratory-data-analysis&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Exploratory Data Analysis&lt;/h2&gt;
+&lt;p&gt;I picked question 105 - What do you call a carbonated beverage? and question 65 - what do you call the insect that glows in the dark because they involve words that people use in common everyday dialect and it’s usually an either-or situation. (&lt;em&gt;CROSSTALK WIDGET&lt;/em&gt;)&lt;/p&gt;
+&lt;p&gt;To investigate further, I created an ID column for every unique combination of possible answers for both questions (without ‘other’), and then I removed the ID’s with a frequency fewer than 5,000.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/unique-1.png&#34; width=&#34;480&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;There are 6 unique combinations occueing more than 3000 times. When we investigate those:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;While combination 19 and 20 seem to dominate the west coast, the rest seem fairly evenly spread over the other regions (combination 9 and 8 seems promiment). There are precisely:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;Combination 19: Use ‘firefly’ and ‘soda’&lt;/li&gt;
+&lt;li&gt;Combination 20: Use ‘firefly’ and ‘pop’&lt;/li&gt;
+&lt;li&gt;Combination 9: Use ‘lightening bug’ and ‘pop’&lt;/li&gt;
+&lt;li&gt;Combination 8: Use ‘lightening bug’ and pop’.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;dimension-reduction-methods&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Dimension reduction methods&lt;/h1&gt;
+&lt;p&gt;As a first step towards dimesnsion reduction, I used Principal Component Analysis. For this, I centered the data. If not, the geometric interpretation of PCA shows that the first principal component will be close to the vector of means and all subsequent PCs will be orthogonal to it, which will prevent them from approximating any PCs that happen to be close to that first vector. I didn’t however, scale the data, instead decided to scale it by the size of the zipcode.&lt;/p&gt;
+&lt;div id=&#34;a-note&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;A note:&lt;/h2&gt;
+&lt;p&gt;It is not a good idea to perform PCA or any other metric-based dimensino reduction on the original data. The challenge with categorical variables is to find a suitable way to represent distances between variable categories and individuals in the factorial space. While PCA can be still be done for binary data, for categorical data,&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;results-of-pca&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Results of PCA&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/PCA-1.png&#34; width=&#34;1440&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;When I colour the observations by region, theres seem to some clusters, but because the Screeplot is not explaining a lot of variation in the first 10 dimesnions, I decide to conduct a TNSE and metric Multi Dimensional Scaling.&lt;/p&gt;
+&lt;p&gt;t-Distributed Stochastic Neighbor Embedding (t-SNE) is a non-linear technique for dimensionality reduction. t-Distributed stochastic neighbor embedding (t-SNE) minimizes the divergence between two distributions: a distribution that measures pairwise similarities of the input objects and a distribution that measures pairwise similarities of the corresponding low-dimensional points in the embedding. It is mainly a data exploration and visualization technique.&lt;/p&gt;
+&lt;p&gt;Multi Dimensional Scaling (MDS) depends on a distance metric. For this dataset I chose pearson correlation, since I’m more interested in the ‘profile’ of an observation. Multidimensional scaling (MDS) is an established statistical technique that has sometimes been used in language study (see Wheeler (2005)).&lt;/p&gt;
+&lt;p&gt;The results are as follows:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/tsne_mds-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;In tSNE and MDS we see that there seems to significant clustering according to region of the observation. t-SNE seems to clear the more clear and well-demarcated clusters. In PCA, however, clustering seems weaker.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;clustering&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Clustering&lt;/h1&gt;
+&lt;div id=&#34;k--means&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;K- MEANS&lt;/h2&gt;
+&lt;p&gt;My first approach was to use k-means to group the clusters. k-means is relatively computationally less expensive and is a good starting point to assess the validity of clusters. it’s useful when we have some sort of a plausible idea of how many clusters exist in the dataset.&lt;/p&gt;
+&lt;p&gt;I tried three metrics - Silhouette, Within sum of squares, and gap statistic to arrive at an optimal &lt;span class=&#34;math inline&#34;&gt;\(k\)&lt;/span&gt;. ‘WSS’ is usually ambiguous and unreliable.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/which_k-1.png&#34; width=&#34;384&#34; /&gt;&lt;img src=&#34;/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/which_k-2.png&#34; width=&#34;384&#34; /&gt;&lt;img src=&#34;/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/which_k-3.png&#34; width=&#34;384&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Both the Silhouette Method and Gap Statistic suggest less than 4 clusters. However, when we run a k-means with &lt;span class=&#34;math inline&#34;&gt;\(k\)&lt;/span&gt; = 2,3,4 and 5, we see that k = 4 seems to give the most uniform groups: (&lt;em&gt;CROSSTALK WIDGET&lt;/em&gt;)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;hierarchical-bipartite-spectral-graph-partioning&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Hierarchical Bipartite Spectral Graph Partioning&lt;/h2&gt;
+&lt;p&gt;The &lt;em&gt;BiSGP&lt;/em&gt; method is based on calculating the singular value decomposition of the input matrix. The hierarchical clustering is obtained by repeatedly clustering the input matrix into two groups. An extensive mathematical explanation as well as an example of the BiSGP method is provided by Wieling and Nerbonne (2010, 2011). Dhillon first introduced this in his 2003 paper: &lt;a href=&#34;https://www.cs.utexas.edu/users/inderjit/public_papers/kdd_bipartite.pdf&#34; class=&#34;uri&#34;&gt;https://www.cs.utexas.edu/users/inderjit/public_papers/kdd_bipartite.pdf&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/biHCP-1.png&#34; width=&#34;384&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;importance-within-a-cluster&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Importance Within A Cluster&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Wieling and Nerbonne (2011)&lt;/strong&gt; proposed a method to measure the importance of a linguistic feature (in our case a specific answer option) in a cluster by combining two measures, &lt;em&gt;representativeness and distinctiveness&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Representativeness of a variant measures how frequently it occurs in the postcode areas in the cluster. For example, if a cluster consists of ten postcode areas and the variant occurs uniquely in six postcode areas, the representativeness is 0.6.&lt;/p&gt;
+&lt;p&gt;Distinctiveness of a variant measures how frequently the variant occurs within as opposed to outside the cluster (while taking the relative size of the clusters into account). For example, a distinctiveness of 1 indicates that the variant is not used outside of the cluster.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/rep_dis-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;For example, we find that in Cluster 4, the two important questions variants are in &lt;strong&gt;Q58&lt;/strong&gt;, same as Cluster 3. Taking a look at the questinos database tells us that this question is &lt;em&gt;Which of these terms do you prefer for a sale of unwanted items on your porch, in your yard, etc.?&lt;/em&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;In cluster 2, one of the most important question is about correct use of &lt;em&gt;Pantyhose are so expensive anymore that I just try to get a good suntan and forget about it.&lt;/em&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Similarly in cluster 1 one of the most important questions is &lt;em&gt;What do you call a public railway system (normally underground)?&lt;/em&gt; and *“Would you say ‘Are you coming with?’ as a full sentence, to mean ‘Are you coming with us?’*&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;stability-of-findings-to-perturbation&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Stability of findings to perturbation&lt;/h1&gt;
+&lt;p&gt;Since k-means and BiSGP depend on random selection of center points, it influences the stability of conclusions. BiSGP method seemed pretty stable because it gave almost the same top 10 most relevant variants for each time I ran the code with different seeds.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/unnamed-chunk-4-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We see that the ‘most important’ questions do seem to change we subsample. I find to be logical because of the clustering is being done on the rows and the columns in BiSGP.&lt;/p&gt;
+&lt;div id=&#34;k-means&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;k-means&lt;/h3&gt;
+&lt;p&gt;For k-means,I subsampled from the data 100 times, and averaged the ‘center matrix’ and compared it the center matrix to the original data.&lt;/p&gt;
+&lt;p&gt;The centers were off at an average of 3.6 units.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;conclusion&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;Reshaping data to make it suitable for analyses is very important. In a data structure like this, many important restructuring decisions, like whether to turn categorical to binary, to scale or not, which distance metric to use, all matter as much as the method of dimesion reduction/ clustering we attempt to do.&lt;/p&gt;
+&lt;p&gt;Dialectrometry and linguistic data in general has great scope for complex analyses, and can be used not only to ascertain spatial trends but perhaps also population characteristics like gender, age, etc.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;references&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;References&lt;/h1&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;Bipartite spectral graph partitioning for clustering dialect varieties and detecting their linguistic features - Martijn Weiling, John Nerbonne&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Co-clustering documents and words using Bipartite Spectral Graph Partitioning - Inderjit S. Dhillon&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Rainfall in New Delhi, India: 1901 - 2015</title>
+      <link>/post/rainfall-analysis/timeseriesproject/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>/post/rainfall-analysis/timeseriesproject/</guid>
+      <description>
+
+
+&lt;p&gt;&lt;em&gt;This analysis was understaken as a part of Cal’s Analysis of Time Series class.&lt;/em&gt;&lt;/p&gt;
+&lt;div id=&#34;dataset&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Dataset&lt;/h2&gt;
+&lt;p&gt;From Kaggle, I downloaded the dataset for rainfall in India from 1901 to 2015, and filtered it to get data only for the city of New Delhi. Then, I made two time series for inital inspection: An annual one, and a monthly one. Since India a tropical country, rainfall is highly seasonal, so it makes sense to retain the monthly data.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(data.table)
+library(forecast)
+library(ggplot2)
+library(astsa)
+rainIndia &amp;lt;- fread(&amp;quot;https://raw.githubusercontent.com/malvikarajeev/misc/master/rainfall%20in%20india%201901-2015.csv&amp;quot;)
+rainDelhi &amp;lt;- rainIndia[SUBDIVISION == &amp;quot;HARYANA DELHI &amp;amp; CHANDIGARH&amp;quot;]
+rainDelhi$total &amp;lt;- rowSums(rainDelhi[,c(3:14)])
+rain_seasonal &amp;lt;- t(as.matrix(rainDelhi[,c(3:14)]))
+rain_seasonal &amp;lt;- unlist(as.list(rain_seasonal))
+
+rain_month &amp;lt;- as.data.frame(rain_seasonal)
+names(rain_month) &amp;lt;- &amp;quot;rain&amp;quot;
+
+
+
+delhiTs &amp;lt;- rainDelhi[,c(2,20)]
+
+head(delhiTs)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    YEAR total
+## 1: 1901 390.2
+## 2: 1902 419.7
+## 3: 1903 428.9
+## 4: 1904 527.5
+## 5: 1905 322.8
+## 6: 1906 593.7&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now, to convert the data to a time series object in R.&lt;/p&gt;
+&lt;div id=&#34;summary-statistics&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Summary Statistics&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rain &amp;lt;- ts(delhiTs$total, start = c(1901))
+rainbymonth &amp;lt;- ts(rain_seasonal, start = c(1901), frequency = 12)
+
+plot.ts(rain, main = &amp;quot;Rainfall by Year&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot.ts(rainbymonth, main = &amp;quot;Rainfall by Month over the Years&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-2-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;When we view the aggregate annual data, there does seem to be some random fluctuations over time, but they seem consistent. When we view the monthly data over the years, there is clearly a seasonal component. Therefore it becomes a time series with &lt;strong&gt;frequency of 12.&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;comparing-monthly-mean-rainfall&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Comparing monthly mean rainfall&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;monthmean &amp;lt;- data.table(1:12)
+monthmean$mean &amp;lt;- colMeans(rainDelhi[,3:14])
+names(monthmean)[1] &amp;lt;- &amp;quot;month&amp;quot;
+annualmean &amp;lt;- mean(rainbymonth)
+ggplot() +
+  geom_line(data = monthmean, aes(x = month, y = mean)) +
+  geom_point(data = monthmean, aes(x = month, y = mean), color = &amp;quot;blue&amp;quot;) + 
+  geom_hline(yintercept = annualmean, linetype=&amp;quot;dashed&amp;quot;) +
+  labs(title = &amp;quot;Mean Monthly Rainfall&amp;quot;, x = &amp;quot;Month&amp;quot;, y = &amp;quot;Rainfall&amp;quot;) +
+  theme_classic()&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;It is very clear that the months of July and June have a very high amount of rainfall, and so excluding theese two months, the rest of the months seem to have low variance around their mean. Monthly analysis of rainfall indicates that the region has very little or no change in non-monsoon months of January, February, March, November and December.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Periodogram
+spectrum(rainbymonth, log = &amp;quot;no&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-4-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;spectrum(rainDelhi$ANNUAL)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-4-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Generally speaking, if a time series appears to be smooth, then the values of the periodogram for low frequencies will be large relative to its other values and we will say that the data set has an excess of low frequency.&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;If a time series has a strong sinusoidal signal for some frequency, then there will be a peak in the periodogram at that frequency.&lt;/li&gt;
+&lt;li&gt;If a time series has a strong nonsinusoidal signal for some frequency, then there will be a peak in the periodogram at that frequency but also peaks at some multiples of that frequency. The first frequency (10 in this case) is called the fundamental frequency and the others called harmonics.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div id=&#34;smoothening&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Smoothening&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(ggplot2)
+rain_month$time_period &amp;lt;- seq(from = as.Date(&amp;quot;1/1/1901&amp;quot;, &amp;quot;%d/%m/%Y&amp;quot;), to = as.Date(&amp;quot;31/12/2015&amp;quot;, &amp;quot;%d/%m/%Y&amp;quot;), by = &amp;quot;month&amp;quot;)
+
+
+##SMOOTHENING: LOESS
+
+decomp_2 &amp;lt;- ggplot(rain_month, aes(x = time_period, y = rain)) +
+  geom_line() +
+  geom_smooth(method = &amp;quot;loess&amp;quot;, se = FALSE, span = 0.2, aes(colour = &amp;quot;h=0.2&amp;quot;)) +
+  geom_smooth(method = &amp;quot;loess&amp;quot;, se = FALSE, span = 0.4, aes(color = &amp;quot;h=0.4&amp;quot;)) +
+  geom_smooth(method = &amp;quot;loess&amp;quot;, se = FALSE, span = 0.6, aes(color = &amp;quot;h=0.6&amp;quot;)) +
+  geom_smooth(method = &amp;quot;loess&amp;quot;, se = FALSE, span = 0.8, aes(color = &amp;quot;h=0.8&amp;quot;)) +
+  geom_smooth(method = &amp;quot;loess&amp;quot;, se = FALSE, span = 1, aes(color = &amp;quot;h=1&amp;quot;)) +
+  scale_colour_manual(&amp;quot;&amp;quot;, 
+                      breaks = c(&amp;quot;h=0.2&amp;quot;,&amp;quot;h=0.4&amp;quot;,&amp;quot;h=0.6&amp;quot;,&amp;quot;h=0.8&amp;quot;,&amp;quot;h=1&amp;quot;),
+                      values = c(&amp;quot;red&amp;quot;, &amp;quot;green&amp;quot;, &amp;quot;blue&amp;quot;,&amp;quot;yellow&amp;quot;,&amp;quot;brown&amp;quot;)) +
+  xlab(&amp;quot; &amp;quot;) +
+  labs(title=&amp;quot;Different LOESS parameters&amp;quot;) +
+  theme_classic()
+decomp_2&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;It is clear that LOESS smoothening is giving us a biased curve for all values of the parameter.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;is-the-series-stationary&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Is the Series Stationary?&lt;/h3&gt;
+&lt;p&gt;Making a time series stationary is required to fit a seasonal ARIMA model. A stationary time series in one which the mean and variances level remains near-constant, and the choice of time origin doesn’t change the overall movement of the time series. A time series has a trend, seasonal, and random part. A seasonal part of this time series obviously exists. Now, to determine the trend part.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;reg &amp;lt;- lm(ANNUAL ~ YEAR, rainDelhi)
+
+rain_yearly &amp;lt;- ggplot(rainDelhi) +
+                    geom_line(aes(x = YEAR, y = ANNUAL)) +
+                    geom_abline(intercept = 646, slope = -0.059) +
+                    theme_classic()
+rain_yearly&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;VARIANCE around mean is 20215.02. The slope of the annual time series is -0.5 mm / 10 years, giving about a decrease of aprx 6.8 in the time period from 1901 to 2015.&lt;/p&gt;
+&lt;p&gt;I used Kwiatkowski-Phillips-Schmidt-Shin (KPSS) to determine stationarity, and the Mann-Kendall test for monotonic trend detection.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(trend)
+library(tseries)
+adf.test(rainbymonth)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Augmented Dickey-Fuller Test
+## 
+## data:  rainbymonth
+## Dickey-Fuller = -9.2452, Lag order = 11, p-value = 0.01
+## alternative hypothesis: stationary&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;kpss.test(rainbymonth, null=&amp;quot;Trend&amp;quot;)$p.value&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 0.1&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;kpss.test(rainbymonth, null=&amp;quot;Level&amp;quot;)$p.value&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 0.1&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#stationarise
+rainComponents &amp;lt;- decompose(rainbymonth)
+plot(rainComponents)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rain_stat &amp;lt;- rainbymonth - rainComponents$seasonal
+plot(rain_stat, main = &amp;quot;monthy rain without seasonal component&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-7-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##kendal test for trend result, for annual rainfall and monthly. 
+library(trend)
+
+
+
+kendall &amp;lt;- mk.test(rainDelhi$ANNUAL)
+kendall$pvalg&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 0.8961508&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;kendall2 &amp;lt;- mk.test(rainbymonth)
+kendall2$pvalg&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 0.4752369&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cat(&amp;quot;there there is no monotonic trend in the annual rainfall data&amp;quot;) &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## there there is no monotonic trend in the annual rainfall data&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After performing the Ljung-Box test for stationarity, I concluded that the monthly rain data is not sufficiently stationary. So I subtracted the seasonal part. After that, the test yields an acceptable p-value.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;boxtest &amp;lt;- Box.test(rainbymonth, lag = 12)
+boxtest$p.value&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 0&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##stationarise time series by removing seasonal part
+
+rain_stat &amp;lt;- rainbymonth - rainComponents$seasonal
+Box.test(rain_stat, lag = 12, type = &amp;quot;Ljung-Box&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Box-Ljung test
+## 
+## data:  rain_stat
+## X-squared = 18.167, df = 12, p-value = 0.1107&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;seasonal-differencing&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Seasonal Differencing&lt;/h3&gt;
+&lt;p&gt;The seasonal difference of a time series is the series of changes from one season to the next. For monthly data, in which there are 12 periods in a season, the seasonal difference of Y at period t is &lt;span class=&#34;math inline&#34;&gt;\(Y_t - Y_{t-12}\)&lt;/span&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;boxplot(rainbymonth~cycle(rainbymonth))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;acf(rainbymonth)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-9-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;pacf(rainbymonth)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-9-3.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Seasonal effect becomes apparent. Even though the mean value of each month apart from the june and july is quite different their variance is small. Hence, we have strong seasonal effect with a cycle of 12 months or less. The time series data should be seasonally differenced, (due to a few spikes in both the ACF and PACF that cut the 95% confidence limits), by order D=1, in order to eliminate seasonality.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rain_ts &amp;lt;- rainbymonth
+
+rainbymonth &amp;lt;- window(rain_ts, end = c(2004,12))
+raincheck &amp;lt;- window(rain_ts, start = c(2005,1))
+
+
+rain_diff &amp;lt;- diff(rainbymonth,36, difference = 1)
+rain_stat_diff &amp;lt;- diff(rain_stat, 36, difference =1)
+
+Acf(rain_diff, lag.max = 50, main = &amp;quot;ACF after seasonal differencing&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-10-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Pacf(rain_diff, lag.max = 50, main = &amp;quot;PACF after seasonal differencing&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-10-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;On inspection, it seems like a SARIMA model with seasonal parameters:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;AR = 1 or 0&lt;/li&gt;
+&lt;li&gt;MA = 1 or 0&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;and non seasonal parameters:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;AR = 0&lt;/li&gt;
+&lt;li&gt;MA = 1 or 2&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;So we run this model , and get the auto.arima model and compare results. The auto.arima model suggested &lt;span class=&#34;math inline&#34;&gt;\((0,0,0,2,1,1)_{12}\)&lt;/span&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;model-fit&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Model Fit&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(astsa)
+model_1 &amp;lt;- sarima(rainbymonth, 1,0,1,1,1,1,12)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## initial  value 4.066829 
+## iter   2 value 3.864028
+## iter   3 value 3.812254
+## iter   4 value 3.761534
+## iter   5 value 3.741852
+## iter   6 value 3.738756
+## iter   7 value 3.737280
+## iter   8 value 3.734718
+## iter   9 value 3.734155
+## iter  10 value 3.733970
+## iter  11 value 3.733952
+## iter  12 value 3.733947
+## iter  13 value 3.733946
+## iter  14 value 3.733946
+## iter  15 value 3.733945
+## iter  16 value 3.733945
+## iter  17 value 3.733945
+## iter  18 value 3.733940
+## iter  19 value 3.733934
+## iter  20 value 3.733923
+## iter  21 value 3.733916
+## iter  22 value 3.733912
+## iter  23 value 3.733912
+## iter  23 value 3.733912
+## final  value 3.733912 
+## converged
+## initial  value 3.732315 
+## iter   2 value 3.731700
+## iter   3 value 3.730950
+## iter   4 value 3.730580
+## iter   5 value 3.730509
+## iter   6 value 3.730496
+## iter   7 value 3.730493
+## iter   8 value 3.730493
+## iter   9 value 3.730493
+## iter  10 value 3.730492
+## iter  11 value 3.730489
+## iter  12 value 3.730482
+## iter  13 value 3.730479
+## iter  14 value 3.730477
+## iter  15 value 3.730477
+## iter  16 value 3.730476
+## iter  17 value 3.730476
+## iter  18 value 3.730475
+## iter  19 value 3.730473
+## iter  20 value 3.730469
+## iter  21 value 3.730459
+## iter  22 value 3.730443
+## iter  23 value 3.730428
+## iter  24 value 3.730425
+## iter  25 value 3.730423
+## iter  26 value 3.730422
+## iter  27 value 3.730422
+## iter  27 value 3.730422
+## iter  27 value 3.730422
+## final  value 3.730422 
+## converged&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_2 &amp;lt;- sarima(rainbymonth, 0,0,0,2,1,0,12)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## initial  value 4.070425 
+## iter   2 value 3.927099
+## iter   3 value 3.874484
+## iter   4 value 3.871906
+## iter   5 value 3.871527
+## iter   6 value 3.871527
+## iter   6 value 3.871527
+## iter   6 value 3.871527
+## final  value 3.871527 
+## converged
+## initial  value 3.866630 
+## iter   2 value 3.866613
+## iter   3 value 3.866612
+## iter   3 value 3.866612
+## iter   3 value 3.866612
+## final  value 3.866612 
+## converged&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-11-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_1&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## $fit
+## 
+## Call:
+## stats::arima(x = xdata, order = c(p, d, q), seasonal = list(order = c(P, D, 
+##     Q), period = S), xreg = constant, transform.pars = trans, fixed = fixed, 
+##     optim.control = list(trace = trc, REPORT = 1, reltol = tol))
+## 
+## Coefficients:
+##           ar1     ma1     sar1     sma1  constant
+##       -0.1324  0.1768  -0.0272  -0.9758    0.0023
+## s.e.   0.8471  0.8421   0.0296   0.0111    0.0041
+## 
+## sigma^2 estimated as 1687:  log likelihood = -6364.61,  aic = 12741.22
+## 
+## $degrees_of_freedom
+## [1] 1231
+## 
+## $ttable
+##          Estimate     SE  t.value p.value
+## ar1       -0.1324 0.8471  -0.1563  0.8758
+## ma1        0.1768 0.8421   0.2100  0.8337
+## sar1      -0.0272 0.0296  -0.9198  0.3579
+## sma1      -0.9758 0.0111 -88.1313  0.0000
+## constant   0.0023 0.0041   0.5477  0.5840
+## 
+## $AIC
+## [1] 10.2175
+## 
+## $AICc
+## [1] 10.21754
+## 
+## $BIC
+## [1] 10.24213&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_2&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## $fit
+## 
+## Call:
+## stats::arima(x = xdata, order = c(p, d, q), seasonal = list(order = c(P, D, 
+##     Q), period = S), xreg = constant, transform.pars = trans, fixed = fixed, 
+##     optim.control = list(trace = trc, REPORT = 1, reltol = tol))
+## 
+## Coefficients:
+##          sar1     sar2  constant
+##       -0.6578  -0.3339    0.0064
+## s.e.   0.0269   0.0270    0.0571
+## 
+## sigma^2 estimated as 2272:  log likelihood = -6532.94,  aic = 13073.88
+## 
+## $degrees_of_freedom
+## [1] 1233
+## 
+## $ttable
+##          Estimate     SE  t.value p.value
+## sar1      -0.6578 0.0269 -24.4354  0.0000
+## sar2      -0.3339 0.0270 -12.3630  0.0000
+## constant   0.0064 0.0571   0.1119  0.9109
+## 
+## $AIC
+## [1] 10.48427
+## 
+## $AICc
+## [1] 10.48428
+## 
+## $BIC
+## [1] 10.50069&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;auto.arima(rainbymonth, trace=TRUE, seasonal = TRUE)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Fitting models using approximations to speed things up...
+## 
+##  ARIMA(2,0,2)(1,1,1)[12] with drift         : Inf
+##  ARIMA(0,0,0)(0,1,0)[12] with drift         : 13457.89
+##  ARIMA(1,0,0)(1,1,0)[12] with drift         : 13125.87
+##  ARIMA(0,0,1)(0,1,1)[12] with drift         : Inf
+##  ARIMA(0,0,0)(0,1,0)[12]                    : 13455.89
+##  ARIMA(1,0,0)(0,1,0)[12] with drift         : 13459.85
+##  ARIMA(1,0,0)(2,1,0)[12] with drift         : 12991.15
+##  ARIMA(1,0,0)(2,1,1)[12] with drift         : Inf
+##  ARIMA(1,0,0)(1,1,1)[12] with drift         : Inf
+##  ARIMA(0,0,0)(2,1,0)[12] with drift         : 12988.55
+##  ARIMA(0,0,0)(1,1,0)[12] with drift         : 13122.86
+##  ARIMA(0,0,0)(2,1,1)[12] with drift         : Inf
+##  ARIMA(0,0,0)(1,1,1)[12] with drift         : Inf
+##  ARIMA(0,0,1)(2,1,0)[12] with drift         : 12990.16
+##  ARIMA(1,0,1)(2,1,0)[12] with drift         : 12993.16
+##  ARIMA(0,0,0)(2,1,0)[12]                    : 12986.55
+##  ARIMA(0,0,0)(1,1,0)[12]                    : 13120.86
+##  ARIMA(0,0,0)(2,1,1)[12]                    : Inf
+##  ARIMA(0,0,0)(1,1,1)[12]                    : Inf
+##  ARIMA(1,0,0)(2,1,0)[12]                    : 12989.14
+##  ARIMA(0,0,1)(2,1,0)[12]                    : 12988.15
+##  ARIMA(1,0,1)(2,1,0)[12]                    : 12991.15
+## 
+##  Now re-fitting the best model(s) without approximations...
+## 
+##  ARIMA(0,0,0)(2,1,0)[12]                    : 13071.91
+## 
+##  Best model: ARIMA(0,0,0)(2,1,0)[12]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Series: rainbymonth 
+## ARIMA(0,0,0)(2,1,0)[12] 
+## 
+## Coefficients:
+##          sar1     sar2
+##       -0.6578  -0.3339
+## s.e.   0.0269   0.0270
+## 
+## sigma^2 estimated as 2275:  log likelihood=-6532.95
+## AIC=13071.89   AICc=13071.91   BIC=13087.25&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##predicting
+prediction_1 &amp;lt;- sarima.for(rainbymonth, 132,1,0,1,1,1,1,12)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-11-3.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;prediction_2 &amp;lt;- sarima.for(rainbymonth, 132,0,0,0,2,1,0,12)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-11-4.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(forecast)
+#fit &amp;lt;- auto.arima(rainbymonth,max.p = 5,max.q = 5,max.P = 5,max.Q = 5,max.d = 3,seasonal = TRUE,ic = &amp;#39;aicc&amp;#39;)
+#plot(forecast(fit,h=20))
+#hist(fit$residuals)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;A fitted model should be subjected to diagnostic checking with a view to ascertaining its goodness-of-fit to the data. This is done by analysing its residuals. An adequate model should have uncorrelated residuals. This is the minimal condition. The optimal condition is that the residuals should follow a Gaussian distribution with mean zero. The residuals resemble white noise which is a good indication.&lt;/p&gt;
+&lt;p&gt;Now I plot the actual values predictied from 1901 - 2004 for 2005-2015 against the actual data of 2005-2015.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;format &amp;lt;- function(x) {
+  temp &amp;lt;- unlist(as.list(t(as.matrix(x))))
+  temp &amp;lt;- as.data.table(temp)
+  temp$time &amp;lt;- 1:nrow(temp)
+  return(temp)
+}
+             
+predict_1 &amp;lt;-format(prediction_1$pred)
+predict_2 &amp;lt;- format(prediction_2$pred)
+raincheck &amp;lt;- format(raincheck)
+
+##prediction frame:
+predict_1$se &amp;lt;- unlist(as.list(t(as.matrix(prediction_1$pred))))
+predict_1$lower &amp;lt;- predict_1$temp - 1.96*predict_1$se
+predict_1$upper &amp;lt;- predict_1$temp + 1.96*predict_1$se
+                                
+
+ggplot() +
+  geom_line(data = predict_1,aes(x=time,y = temp, colour = &amp;quot;model1&amp;quot;)) +
+  geom_line(data = predict_2,aes(x=time,y = temp, colour = &amp;quot;model2&amp;quot;)) +
+  geom_line(data = raincheck,aes(x=time,y = temp, colour = &amp;quot;truth&amp;quot;)) +
+    scale_colour_manual(&amp;quot;&amp;quot;, 
+                        breaks = c(&amp;quot;model1&amp;quot;,&amp;quot;model2&amp;quot;,&amp;quot;truth&amp;quot;),
+                        values = c(&amp;quot;red&amp;quot;, &amp;quot;green&amp;quot;, &amp;quot;blue&amp;quot;)) +
+    geom_ribbon(data=predict_1,aes(x = time,ymin=lower,ymax=upper),alpha=0.3) +
+    labs(title=&amp;quot;Prediction v Truth with 95% confidence bands&amp;quot;) +
+    theme_classic()&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-12-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The predictions seem not too far from the truth, and within the confidence intervals. The AIC’s for the SARIMA models are almost identical.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;conclusion&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Conclusion:&lt;/h3&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;Rainfall in Delhi is highly seasonal, with peak during July and June.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;There is no ascertainable overall monotonic trend in the data.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Series can be made sufficiently stationary by subtracting the seasonal component, and by differencing (degree 1) over a frequency of 12 months.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;SARIMA models are adequate in predicting weather forecasts.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Spotify!</title>
+      <link>/post/spotifyanalysis/spotifyanalysis/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>/post/spotifyanalysis/spotifyanalysis/</guid>
+      <description>
+
+
+&lt;p&gt;So a while ago my friend who just started using RStudio and is a bit overexcited about working with data told me about getting all your spotify data is totally doable, all you gotta do is email spotify. Follow the link here for more details: &lt;a href=&#34;https://support.spotify.com/ca-en/article/data-rights-and-privacy-settings/&#34; class=&#34;uri&#34;&gt;https://support.spotify.com/ca-en/article/data-rights-and-privacy-settings/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Spotify will email your data in a zip format in JSON files. I use the jsonlite package in R to read the data in.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;urlspot = &amp;quot;https://raw.githubusercontent.com/malvikarajeev/spotifyAnalysis/master/&amp;quot;
+
+spot0 = jsonlite::read_json(paste(urlspot,&amp;quot;StreamingHistory0.json&amp;quot;, sep = &amp;quot;&amp;quot;), simplifyVector = T)
+
+spot1 = jsonlite::read_json(paste(urlspot,&amp;quot;StreamingHistory1.json&amp;quot;, sep = &amp;quot;&amp;quot;), simplifyVector = T)
+
+spot = rbind(spot0, spot1)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The data is pretty straightforward: the time the track ended streaming, artist and track name, and the milliseconds it was listened to. I’ll use shiny to visualise my streaming trends.&lt;/p&gt;
+&lt;div id=&#34;section-using-lubridate-to-get-end-times&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;using lubridate to get end times&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;spot$end_time = as.POSIXct(strptime(spot$endTime, &amp;quot;%Y-%m-%d %H:%M&amp;quot;))
+spot$date = date(spot$end_time)
+spot$month = month(spot$date, label = T)
+
+customm = function(date){
+  temp = strsplit(date, &amp;#39; &amp;#39;) %&amp;gt;% unlist
+  temp2 = temp[2]
+  return(temp2)
+}
+  
+  
+  
+  
+spot$only_time = parse_time(sapply(spot$endTime, customm))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;my_seconds &amp;lt;- period_to_seconds(hms(spot$only_time))
+myIntervals &amp;lt;- c(&amp;quot;0 AM - 6 AM&amp;quot;, &amp;quot;6 AM - 12 PM&amp;quot;, &amp;quot;12 PM - 6 PM&amp;quot;, &amp;quot;6 PM - 0 AM&amp;quot;)
+spot$interval &amp;lt;- myIntervals[findInterval(my_seconds, c(0, 6, 12, 18, 24) * 3600)]
+
+##I want to group by interval, trackName, sum up the milliseconds, and get highest milisecond for each interval arrranged by trackname
+
+interval_artist = spot %&amp;gt;% group_by(interval, trackName) %&amp;gt;% summarise(s = sum(msPlayed)) %&amp;gt;% arrange(-s) %&amp;gt;% top_n(20, s)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;For shiny documents/chunks, make sure cache = FALSE. Markdown can’t cache shiny stuff since the &lt;code&gt;reactive&lt;/code&gt; function already does that.&lt;/p&gt;
+&lt;p&gt;Shiny can be used to create some pretty interactive visualisations. I wanted to see what kind of music I listen to monthly, and what times. A simple if-else clause in your ggplot can simplify visualisation according to user specification.&lt;/p&gt;
+&lt;iframe src&gt;
+&lt;/iframe&gt;
+&lt;iframe width height=&#34;400&#34; scrolling=&#34;no&#34; frameborder=&#34;no&#34; src=&#34;https://malvika.shinyapps.io/spotifyshiny/&#34; allowfullscreen=&#34;true&#34;&gt;
+&lt;/iframe&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>uber data</title>
+      <link>/post/uberanalysis/uberanalysis/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>/post/uberanalysis/uberanalysis/</guid>
+      <description>
+
+
+&lt;div id=&#34;requesting-data-from-uber&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;requesting data from uber&lt;/h2&gt;
+&lt;p&gt;The purpose of this exercise is to visualise how I use my uber data. Uber records are pretty useful - just ask uber to email you your data: &lt;a href=&#34;https://help.uber.com/driving-and-delivering/article/request-your-personal-uber-data?nodeId=fbf08e68-65ba-456b-9bc6-1369eb9d2c44&#34; class=&#34;uri&#34;&gt;https://help.uber.com/driving-and-delivering/article/request-your-personal-uber-data?nodeId=fbf08e68-65ba-456b-9bc6-1369eb9d2c44&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;I’m removing remore 2020 and 2015 (it contains only one day) for now becuase it might skew the data.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;reading-in-the-data&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;reading in the data&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;myrides = read.csv(&amp;quot;https://raw.githubusercontent.com/malvikarajeev/uberAnalysis/master/trips_data.csv&amp;quot;)
+
+head(myrides)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##          City Product.Type Trip.or.Order.Status
+## 1 Los Angeles        UberX            COMPLETED
+## 2 Los Angeles        UberX            COMPLETED
+## 3 Los Angeles        UberX            COMPLETED
+## 4 Los Angeles        UberX            COMPLETED
+## 5 Los Angeles        UberX            COMPLETED
+## 6 Los Angeles        UberX      DRIVER_CANCELED
+##                    Request.Time               Begin.Trip.Time
+## 1 2020-02-17 04:43:38 +0000 UTC 2020-02-17 04:52:00 +0000 UTC
+## 2 2020-02-17 01:17:06 +0000 UTC 2020-02-17 01:19:19 +0000 UTC
+## 3 2020-02-16 20:29:34 +0000 UTC 2020-02-16 20:35:00 +0000 UTC
+## 4 2020-02-16 18:45:42 +0000 UTC 2020-02-16 18:51:31 +0000 UTC
+## 5 2020-02-16 00:17:16 +0000 UTC 2020-02-16 00:23:12 +0000 UTC
+## 6 2020-02-15 23:36:22 +0000 UTC 1970-01-01 00:00:00 +0000 UTC
+##   Begin.Trip.Lat Begin.Trip.Lng
+## 1       34.08361      -118.3521
+## 2       33.99775      -118.4748
+## 3       33.96174      -118.3673
+## 4       33.98221      -118.4594
+## 5       34.01283      -118.4966
+## 6       34.01028      -118.4934
+##                                 Begin.Trip.Address
+## 1      7422 Melrose Ave, Los Angeles, CA 90046, US
+## 2               423 Rose Ave, Venice, CA 90291, US
+## 3   621 W Manchester Blvd, Inglewood, CA 90301, US
+## 4 4100 Admiralty Way, Marina del Rey, CA 90292, US
+## 5         111 Broadway, Santa Monica, CA 90401, US
+## 6                                                 
+##                    Dropoff.Time Dropoff.Lat Dropoff.Lng
+## 1 2020-02-17 05:01:35 +0000 UTC    34.09819   -118.3077
+## 2 2020-02-17 01:29:59 +0000 UTC    33.98216   -118.4595
+## 3 2020-02-16 20:55:09 +0000 UTC    33.97935   -118.4664
+## 4 2020-02-16 19:07:13 +0000 UTC    33.96225   -118.3671
+## 5 2020-02-16 00:46:38 +0000 UTC    33.98220   -118.4595
+## 6 1970-01-01 00:00:00 +0000 UTC    34.01351   -118.4972
+##                                                                                Dropoff.Address
+## 1                                                5419 W Sunset Blvd, Los Angeles, CA 90027, US
+## 2                                             4100 Admiralty Way, Marina del Rey, CA 90292, US
+## 3 Venice Beach Pier Public Parkingl Lot, Unnamed Road, Marina Del Rey, CA 90292, United States
+## 4                                               621 W Manchester Blvd, Inglewood, CA 90301, US
+## 5                                             4100 Admiralty Way, Marina del Rey, CA 90292, US
+## 6                                             4100 Admiralty Way, Marina del Rey, CA 90292, US
+##   Distance..miles. Fare.Amount Fare.Currency
+## 1             3.56        9.14           USD
+## 2             2.21        7.43           USD
+## 3             7.27       11.65           USD
+## 4             7.24       10.63           USD
+## 5             3.81       10.30           USD
+## 6             0.00        5.00           USD&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;myrides$completed = ifelse(myrides$Trip.or.Order.Status == &amp;#39;COMPLETED&amp;#39;, T, F)
+
+##basic eda
+
+myrides$time_started = as.POSIXct(strptime(myrides$Begin.Trip.Time, &amp;quot;%Y-%m-%d %H:%M:%S&amp;quot;))
+
+myrides$year = year(myrides$time_started)
+##remove 1970 and not completed
+
+myrides = myrides %&amp;gt;% filter(!(year == 1970 | year == 2020 | year == 2015))
+myrides = myrides %&amp;gt;% filter(Product.Type != &amp;#39;UberEATS Marketplace&amp;#39;)
+myrides = myrides %&amp;gt;% filter(completed == T)
+myrides$month_year = format(as.Date(myrides$Begin.Trip.Time), &amp;quot;%Y-%m&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot(myrides, aes(x = month_year)) + 
+  geom_bar(aes(fill = as.factor(year))) + 
+  scale_fill_brewer(palette=&amp;quot;Set1&amp;quot;) +
+  theme_tufte() +
+  theme(axis.text.x = element_blank()) + 
+  labs(y = &amp;#39;Frequency of Rides&amp;#39;, x = &amp;#39;Time Period&amp;#39;) +
+  scale_fill_discrete(name = &amp;quot;Year&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Scale for &amp;#39;fill&amp;#39; is already present. Adding another scale for &amp;#39;fill&amp;#39;,
+## which will replace the existing scale.&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/malvikarajeev.github.io/post/uberAnalysis/uberAnalysis_files/figure-html/prelim-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Seems like on an avergae I took about 10-20 rides a month, seemingly growing with every year. there seems to be a coherent pattern in that number of rides increase monotically as we move from January to February (except for in 2018). The month of September-November seems generally low.&lt;/p&gt;
+&lt;p&gt;Now, I moved from New Delhi, India, to Berkeley, California, in the month of August, 2018. Can we see this move reflect different patterns?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;average-trip-time.&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;average trip time.&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;myrides$time_ended = as.POSIXct(strptime(myrides$Dropoff.Time, &amp;quot;%Y-%m-%d %H:%M:%S&amp;quot;))
+myrides$duration_mins = myrides$time_ended - myrides$time_started
+myrides$duration_mins = as.integer(myrides$duration_mins)
+
+ggplot(myrides, aes(y = duration_mins, x = month_year)) + geom_boxplot() +
+  theme_tufte() +
+  theme(axis.text.x = element_blank()) + 
+  labs(y = &amp;#39;Distribution of Rides&amp;#39;, x = &amp;#39;Time Period&amp;#39;) +
+  scale_fill_discrete(name = &amp;quot;Year&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/malvikarajeev.github.io/post/uberAnalysis/uberAnalysis_files/figure-html/avg_time-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The average time of my rides is decreasing: perhaps it makes sense, the traffic in New Delhi is insane comapred to the traffic in Berkeley.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;fare-habits&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;fare habits&lt;/h2&gt;
+&lt;p&gt;I wanted to group by year, and get the cumulative fare for each year by month. In the pursuit of this, I found a function called &lt;code&gt;ave&lt;/code&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;fare_wise = function(currency){
+  fares = myrides %&amp;gt;%
+          filter(Fare.Currency == currency) %&amp;gt;%
+          group_by(year, month_year) %&amp;gt;% 
+          summarise(monthly_fare = sum(Fare.Amount, na.rm = T))
+  fares$cumulative_fare = ave(fares$monthly_fare, fares$year, FUN = cumsum)
+  return(fares)
+}
+
+inr = fare_wise(&amp;#39;INR&amp;#39;)
+##Adding year
+
+##
+
+
+ggplot(inr) +
+  geom_point(aes(y = cumulative_fare, x = month_year, color = factor(year))) + 
+  theme_tufte() +
+  transition_states(year, wrap = T) &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/malvikarajeev.github.io/post/uberAnalysis/uberAnalysis_files/figure-html/animation1-1.gif&#34; /&gt;&lt;!-- --&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;  # labs(title = &amp;quot;Year: {frame_time}&amp;quot;) +
+  # view_follow(fixed_x = T)
+
+# anim_save(&amp;quot;inr.gif&amp;quot;, animation = gg, path = &amp;quot;/figures&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;!-- ![Spending Habits](/figures/inr.gif) --&gt;
+&lt;p&gt;What the hell was I doing in 2017… damn.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;temp = myrides %&amp;gt;% filter(Begin.Trip.Lat * Begin.Trip.Lng != Dropoff.Lat*Dropoff.Lng) %&amp;gt;% filter(Fare.Currency == &amp;#39;USD&amp;#39;)
+
+
+
+usa_map = map_data(&amp;quot;county&amp;quot;)
+
+ca_df &amp;lt;- usa_map %&amp;gt;% filter(region == &amp;#39;california&amp;#39;)
+
+# ggplot() + 
+#   geom_polygon(data = ca_df, aes(x=long, y = lat)) +
+#   coord_fixed(1.3) +
+#   geom_curve(data=temp,
+#              aes(x=Begin.Trip.Lng, y=Begin.Trip.Lat, xend=Dropoff.Lng, yend=Dropoff.Lat),
+#              col = &amp;quot;#b29e7d&amp;quot;, size = 1, curvature = .2) +
+#   geom_point(data=temp,
+#              aes(x=Dropoff.Lng, y=Dropoff.Lat), 
+#              colour=&amp;quot;blue&amp;quot;,
+#              size=1.5) +
+#   geom_point(data=temp,
+#              aes(x=Begin.Trip.Lng, y=Begin.Trip.Lat), 
+#              colour=&amp;quot;blue&amp;quot;) +
+#   theme(axis.line=element_blank(),
+#         axis.text.x=element_blank(),
+#         axis.text.y=element_blank(),
+#         axis.title.x=element_blank(),
+#         axis.title.y=element_blank(),
+#         axis.ticks=element_blank(),
+#         plot.title=element_text(hjust=0.5, size=12))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(shiny)
+library(ggmap)
+library(ggplot2)
+
+ui &amp;lt;- fluidPage(
+  titlePanel(&amp;quot;My Uber Rides&amp;quot;),
+  
+  sidebarLayout(
+    # sidebarPanel(
+    #   radioButtons(&amp;quot;radio&amp;quot;, label = h4(&amp;quot;Choose currency&amp;quot;),
+    # choices = list(&amp;quot;USD&amp;quot; = &amp;#39;USD&amp;#39;, &amp;quot;INR&amp;quot; = &amp;#39;INR&amp;#39;)), 
+    
+      # radioButtons(&amp;quot;interval&amp;quot;, label = h4(&amp;quot;show time of day?&amp;quot;),
+      #              choices = list(&amp;quot;Yes&amp;quot; = TRUE, &amp;quot;No&amp;quot; = FALSE)),
+
+      
+      selectInput(&amp;quot;month_year&amp;quot;, label = &amp;quot;Choose Month and Year&amp;quot;,
+                  choices = unique(temp$month_year)),
+                 
+      
+      sliderInput(&amp;quot;duration_ride&amp;quot;, &amp;quot;Duration of Rides&amp;quot;, min = 1, max = max(temp$duration), value = c(1,10))
+    ),
+    
+    mainPanel(plotOutput(outputId = &amp;quot;my_map&amp;quot;)
+    
+  )
+)
+)
+
+#load()
+
+server &amp;lt;- function(input, output) {
+  
+  outputR = reactive({
+    req(input$duration_ride)
+    req(input$month_year)
+    temp2 = temp%&amp;gt;% filter(duration_mins &amp;lt;= input$duration_ride[2] &amp;amp; duration_mins &amp;gt;= input$duration_ride[1]) %&amp;gt;% filter(month_year == input$month_year)
+    
+    
+    usa_map = map_data(&amp;quot;county&amp;quot;)
+
+    ca_df &amp;lt;- usa_map %&amp;gt;% filter(region == &amp;#39;california&amp;#39;)
+  long = mean(temp2$Dropoff.Lng, na.rm = T)
+  latt = mean(temp2$Dropoff.Lat, na.rm = T)
+  g = ggmap(get_googlemap(c(long, latt),
+                    zoom = 15 , scale = 2,
+                    maptype =&amp;#39;roadmap&amp;#39;,
+                    color = &amp;#39;color&amp;#39;, archiving = T)) +
+    
+    geom_segment(data=temp2,
+              aes(x=Begin.Trip.Lng, y=Begin.Trip.Lat, xend=Dropoff.Lng, yend=Dropoff.Lat),
+              col = &amp;quot;black&amp;quot;, size = 0.3, arrow = arrow()) +
+  geom_point(data=temp2,
+             aes(x=Dropoff.Lng, y=Dropoff.Lat, 
+             colour=&amp;quot;red&amp;quot;),
+             alpha = 0.5) +
+  geom_point(data=temp2,
+             aes(x=Begin.Trip.Lng, y=Begin.Trip.Lat, 
+             colour=&amp;quot;blue&amp;quot;), alpha = 0.5) + 
+    scale_color_identity(
+                          breaks = c(&amp;quot;red&amp;quot;, &amp;quot;blue&amp;quot;),
+                          labels = c(&amp;quot;Drop off Point&amp;quot;, &amp;quot;Pick up point&amp;quot;),
+                          guide = &amp;quot;legend&amp;quot;) 
+    
+    
+  
+  g
+   
+  })
+  
+  output$my_map= renderPlot({outputR()})
+}
+
+shinyApp(ui = ui, server = server)&lt;/code&gt;&lt;/pre&gt;
+&lt;iframe width height=&#34;400&#34; scrolling=&#34;no&#34; frameborder=&#34;no&#34; src=&#34;https://malvika.shinyapps.io/ubershiny/&#34; allowfullscreen=&#34;true&#34;&gt;
+&lt;/iframe&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

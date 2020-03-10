@@ -1,0 +1,242 @@
+---
+title: "uber data"
+author: "Malvika Rajeev"
+date: "2/22/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+library(shiny)
+library(maps)
+library(ggplot2)
+library(lubridate)
+library(ggthemes)
+library(tidyverse)
+library(ggrepel)
+library(gganimate)
+library(ggraph)
+library(gapminder)
+library(ggmap)
+library(igraph)
+library(purrr)
+```
+
+##requesting data from uber
+
+The purpose of this exercise is to visualise how I use my uber data. Uber records are pretty useful - just ask uber to email you your data: https://help.uber.com/driving-and-delivering/article/request-your-personal-uber-data?nodeId=fbf08e68-65ba-456b-9bc6-1369eb9d2c44
+
+I'm removing remore 2020 and 2015 (it contains only one day) for now becuase it might skew the data.
+
+##reading in the data
+
+
+```{r read-in}
+
+
+myrides = read.csv("https://raw.githubusercontent.com/malvikarajeev/uberAnalysis/master/trips_data.csv")
+
+head(myrides)
+
+myrides$completed = ifelse(myrides$Trip.or.Order.Status == 'COMPLETED', T, F)
+
+##basic eda
+
+myrides$time_started = as.POSIXct(strptime(myrides$Begin.Trip.Time, "%Y-%m-%d %H:%M:%S"))
+
+myrides$year = year(myrides$time_started)
+##remove 1970 and not completed
+
+myrides = myrides %>% filter(!(year == 1970 | year == 2020 | year == 2015))
+myrides = myrides %>% filter(Product.Type != 'UberEATS Marketplace')
+myrides = myrides %>% filter(completed == T)
+myrides$month_year = format(as.Date(myrides$Begin.Trip.Time), "%Y-%m")
+```
+
+```{r prelim}
+ggplot(myrides, aes(x = month_year)) + 
+  geom_bar(aes(fill = as.factor(year))) + 
+  scale_fill_brewer(palette="Set1") +
+  theme_tufte() +
+  theme(axis.text.x = element_blank()) + 
+  labs(y = 'Frequency of Rides', x = 'Time Period') +
+  scale_fill_discrete(name = "Year")
+```
+
+Seems like on an avergae I took about 10-20 rides a month, seemingly growing with every year. there seems to be a coherent pattern in that number of rides increase monotically as we move from January to February (except for in 2018). The month of September-November seems generally low. 
+
+
+Now, I moved from New Delhi, India, to Berkeley, California, in the month of August, 2018. Can we see this move reflect different patterns?
+
+##average trip time.
+
+```{r avg_time}
+myrides$time_ended = as.POSIXct(strptime(myrides$Dropoff.Time, "%Y-%m-%d %H:%M:%S"))
+myrides$duration_mins = myrides$time_ended - myrides$time_started
+myrides$duration_mins = as.integer(myrides$duration_mins)
+
+ggplot(myrides, aes(y = duration_mins, x = month_year)) + geom_boxplot() +
+  theme_tufte() +
+  theme(axis.text.x = element_blank()) + 
+  labs(y = 'Distribution of Rides', x = 'Time Period') +
+  scale_fill_discrete(name = "Year")
+  
+```
+
+The average time of my rides is decreasing: perhaps it makes sense, the traffic in New Delhi is insane comapred to the traffic in Berkeley.
+
+##fare habits
+
+I wanted to group by year, and get the cumulative fare for each year by month. In the pursuit of this, I found a function called `ave`
+
+
+
+
+```{r animation1}
+fare_wise = function(currency){
+  fares = myrides %>%
+          filter(Fare.Currency == currency) %>%
+          group_by(year, month_year) %>% 
+          summarise(monthly_fare = sum(Fare.Amount, na.rm = T))
+  fares$cumulative_fare = ave(fares$monthly_fare, fares$year, FUN = cumsum)
+  return(fares)
+}
+
+inr = fare_wise('INR')
+##Adding year
+
+##
+
+
+ggplot(inr) +
+  geom_point(aes(y = cumulative_fare, x = month_year, color = factor(year))) + 
+  theme_tufte() +
+  transition_states(year, wrap = T) 
+  # labs(title = "Year: {frame_time}") +
+  # view_follow(fixed_x = T)
+
+# anim_save("inr.gif", animation = gg, path = "/figures")
+
+```
+
+<!-- ![Spending Habits](/figures/inr.gif) -->
+
+What the hell was I doing in 2017... damn.
+
+
+
+```{r}
+temp = myrides %>% filter(Begin.Trip.Lat * Begin.Trip.Lng != Dropoff.Lat*Dropoff.Lng) %>% filter(Fare.Currency == 'USD')
+
+
+
+usa_map = map_data("county")
+
+ca_df <- usa_map %>% filter(region == 'california')
+
+# ggplot() + 
+#   geom_polygon(data = ca_df, aes(x=long, y = lat)) +
+#   coord_fixed(1.3) +
+#   geom_curve(data=temp,
+#              aes(x=Begin.Trip.Lng, y=Begin.Trip.Lat, xend=Dropoff.Lng, yend=Dropoff.Lat),
+#              col = "#b29e7d", size = 1, curvature = .2) +
+#   geom_point(data=temp,
+#              aes(x=Dropoff.Lng, y=Dropoff.Lat), 
+#              colour="blue",
+#              size=1.5) +
+#   geom_point(data=temp,
+#              aes(x=Begin.Trip.Lng, y=Begin.Trip.Lat), 
+#              colour="blue") +
+#   theme(axis.line=element_blank(),
+#         axis.text.x=element_blank(),
+#         axis.text.y=element_blank(),
+#         axis.title.x=element_blank(),
+#         axis.title.y=element_blank(),
+#         axis.ticks=element_blank(),
+#         plot.title=element_text(hjust=0.5, size=12))
+             
+```
+
+
+```{r shiny, cache = F, eval = F}
+library(shiny)
+library(ggmap)
+library(ggplot2)
+
+ui <- fluidPage(
+  titlePanel("My Uber Rides"),
+  
+  sidebarLayout(
+    # sidebarPanel(
+    #   radioButtons("radio", label = h4("Choose currency"),
+    # choices = list("USD" = 'USD', "INR" = 'INR')), 
+    
+      # radioButtons("interval", label = h4("show time of day?"),
+      #              choices = list("Yes" = TRUE, "No" = FALSE)),
+
+      
+      selectInput("month_year", label = "Choose Month and Year",
+                  choices = unique(temp$month_year)),
+                 
+      
+      sliderInput("duration_ride", "Duration of Rides", min = 1, max = max(temp$duration), value = c(1,10))
+    ),
+    
+    mainPanel(plotOutput(outputId = "my_map")
+    
+  )
+)
+)
+
+#load()
+
+server <- function(input, output) {
+  
+  outputR = reactive({
+    req(input$duration_ride)
+    req(input$month_year)
+    temp2 = temp%>% filter(duration_mins <= input$duration_ride[2] & duration_mins >= input$duration_ride[1]) %>% filter(month_year == input$month_year)
+    
+    
+    usa_map = map_data("county")
+
+    ca_df <- usa_map %>% filter(region == 'california')
+  long = mean(temp2$Dropoff.Lng, na.rm = T)
+  latt = mean(temp2$Dropoff.Lat, na.rm = T)
+  g = ggmap(get_googlemap(c(long, latt),
+                    zoom = 15 , scale = 2,
+                    maptype ='roadmap',
+                    color = 'color', archiving = T)) +
+    
+    geom_segment(data=temp2,
+              aes(x=Begin.Trip.Lng, y=Begin.Trip.Lat, xend=Dropoff.Lng, yend=Dropoff.Lat),
+              col = "black", size = 0.3, arrow = arrow()) +
+  geom_point(data=temp2,
+             aes(x=Dropoff.Lng, y=Dropoff.Lat, 
+             colour="red"),
+             alpha = 0.5) +
+  geom_point(data=temp2,
+             aes(x=Begin.Trip.Lng, y=Begin.Trip.Lat, 
+             colour="blue"), alpha = 0.5) + 
+    scale_color_identity(
+                          breaks = c("red", "blue"),
+                          labels = c("Drop off Point", "Pick up point"),
+                          guide = "legend") 
+    
+    
+  
+  g
+   
+  })
+  
+  output$my_map= renderPlot({outputR()})
+}
+
+shinyApp(ui = ui, server = server)
+  
+
+```
+
+<iframe width="" height="400" scrolling="no" frameborder="no"  src="https://malvika.shinyapps.io/ubershiny/" allowfullscreen = true> </iframe>
+
+

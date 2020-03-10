@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.7.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Malvika Rajeev">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="This analysis was understaken as a part of Cal’s Analysis of Time Series class.
+Dataset From Kaggle, I downloaded the dataset for rainfall in India from 1901 to 2015, and filtered it to get data only for the city of New Delhi. Then, I made two time series for inital inspection: An annual one, and a monthly one. Since India a tropical country, rainfall is highly seasonal, so it makes sense to retain the monthly data.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/rainfall-analysis/timeseriesproject/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#EAF04E">
+  
+
+  
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css" integrity="sha256-4w9DunooKSr3MFXHXWyFER38WmPdm361bQS/2KUWZbU=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin="anonymous" title="hl-light" disabled>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark">
+        
+      
+    
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin="anonymous">
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+        
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.css">
+
+  
+
+
+
+
+  
+
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="/post/rainfall-analysis/timeseriesproject/">
+
+  
+  
+  
+  
+  
+    
+  
+  
+  <meta property="twitter:card" content="summary_large_image">
+  
+  <meta property="twitter:site" content="@malvikarajeev">
+  <meta property="twitter:creator" content="@malvikarajeev">
+  
+  <meta property="og:site_name" content="what dat data do?">
+  <meta property="og:url" content="/post/rainfall-analysis/timeseriesproject/">
+  <meta property="og:title" content="Rainfall in New Delhi, India: 1901 - 2015 | what dat data do?">
+  <meta property="og:description" content="This analysis was understaken as a part of Cal’s Analysis of Time Series class.
+Dataset From Kaggle, I downloaded the dataset for rainfall in India from 1901 to 2015, and filtered it to get data only for the city of New Delhi. Then, I made two time series for inital inspection: An annual one, and a monthly one. Since India a tropical country, rainfall is highly seasonal, so it makes sense to retain the monthly data."><meta property="og:image" content="/img/cover_photo.jpg">
+  <meta property="twitter:image" content="/img/cover_photo.jpg"><meta property="og:locale" content="en-us">
+  
+    
+    
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/post/rainfall-analysis/timeseriesproject/"
+  },
+  "headline": "Rainfall in New Delhi, India: 1901 - 2015",
+  
+  "datePublished": "0001-01-01T00:00:00Z",
+  "dateModified": "0001-01-01T00:00:00Z",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Malvika Rajeev"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "what dat data do?",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png"
+    }
+  },
+  "description": "This analysis was understaken as a part of Cal’s Analysis of Time Series class.\nDataset From Kaggle, I downloaded the dataset for rainfall in India from 1901 to 2015, and filtered it to get data only for the city of New Delhi. Then, I made two time series for inital inspection: An annual one, and a monthly one. Since India a tropical country, rainfall is highly seasonal, so it makes sense to retain the monthly data."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Rainfall in New Delhi, India: 1901 - 2015 | what dat data do?</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" class="dark">
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-end" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#contact"><span>Contact</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+      <li class="nav-item">
+        <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Rainfall in New Delhi, India: 1901 - 2015</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Jan 1, 0001
+  </span>
+  
+
+  
+
+  
+
+  
+  
+  
+
+  
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
+
+
+<p><em>This analysis was understaken as a part of Cal’s Analysis of Time Series class.</em></p>
+<div id="dataset" class="section level2">
+<h2>Dataset</h2>
+<p>From Kaggle, I downloaded the dataset for rainfall in India from 1901 to 2015, and filtered it to get data only for the city of New Delhi. Then, I made two time series for inital inspection: An annual one, and a monthly one. Since India a tropical country, rainfall is highly seasonal, so it makes sense to retain the monthly data.</p>
+<pre class="r"><code>library(data.table)
+library(forecast)
+library(ggplot2)
+library(astsa)
+rainIndia &lt;- fread(&quot;https://raw.githubusercontent.com/malvikarajeev/misc/master/rainfall%20in%20india%201901-2015.csv&quot;)
+rainDelhi &lt;- rainIndia[SUBDIVISION == &quot;HARYANA DELHI &amp; CHANDIGARH&quot;]
+rainDelhi$total &lt;- rowSums(rainDelhi[,c(3:14)])
+rain_seasonal &lt;- t(as.matrix(rainDelhi[,c(3:14)]))
+rain_seasonal &lt;- unlist(as.list(rain_seasonal))
+
+rain_month &lt;- as.data.frame(rain_seasonal)
+names(rain_month) &lt;- &quot;rain&quot;
+
+
+
+delhiTs &lt;- rainDelhi[,c(2,20)]
+
+head(delhiTs)</code></pre>
+<pre><code>##    YEAR total
+## 1: 1901 390.2
+## 2: 1902 419.7
+## 3: 1903 428.9
+## 4: 1904 527.5
+## 5: 1905 322.8
+## 6: 1906 593.7</code></pre>
+<p>Now, to convert the data to a time series object in R.</p>
+<div id="summary-statistics" class="section level3">
+<h3>Summary Statistics</h3>
+<pre class="r"><code>rain &lt;- ts(delhiTs$total, start = c(1901))
+rainbymonth &lt;- ts(rain_seasonal, start = c(1901), frequency = 12)
+
+plot.ts(rain, main = &quot;Rainfall by Year&quot;)</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code>plot.ts(rainbymonth, main = &quot;Rainfall by Month over the Years&quot;)</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
+<p>When we view the aggregate annual data, there does seem to be some random fluctuations over time, but they seem consistent. When we view the monthly data over the years, there is clearly a seasonal component. Therefore it becomes a time series with <strong>frequency of 12.</strong></p>
+</div>
+<div id="comparing-monthly-mean-rainfall" class="section level3">
+<h3>Comparing monthly mean rainfall</h3>
+<pre class="r"><code>monthmean &lt;- data.table(1:12)
+monthmean$mean &lt;- colMeans(rainDelhi[,3:14])
+names(monthmean)[1] &lt;- &quot;month&quot;
+annualmean &lt;- mean(rainbymonth)
+ggplot() +
+  geom_line(data = monthmean, aes(x = month, y = mean)) +
+  geom_point(data = monthmean, aes(x = month, y = mean), color = &quot;blue&quot;) + 
+  geom_hline(yintercept = annualmean, linetype=&quot;dashed&quot;) +
+  labs(title = &quot;Mean Monthly Rainfall&quot;, x = &quot;Month&quot;, y = &quot;Rainfall&quot;) +
+  theme_classic()</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>It is very clear that the months of July and June have a very high amount of rainfall, and so excluding theese two months, the rest of the months seem to have low variance around their mean. Monthly analysis of rainfall indicates that the region has very little or no change in non-monsoon months of January, February, March, November and December.</p>
+<pre class="r"><code>#Periodogram
+spectrum(rainbymonth, log = &quot;no&quot;)</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code>spectrum(rainDelhi$ANNUAL)</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+<p>Generally speaking, if a time series appears to be smooth, then the values of the periodogram for low frequencies will be large relative to its other values and we will say that the data set has an excess of low frequency.</p>
+<ol style="list-style-type: decimal">
+<li>If a time series has a strong sinusoidal signal for some frequency, then there will be a peak in the periodogram at that frequency.</li>
+<li>If a time series has a strong nonsinusoidal signal for some frequency, then there will be a peak in the periodogram at that frequency but also peaks at some multiples of that frequency. The first frequency (10 in this case) is called the fundamental frequency and the others called harmonics.</li>
+</ol>
+</div>
+<div id="smoothening" class="section level3">
+<h3>Smoothening</h3>
+<pre class="r"><code>library(ggplot2)
+rain_month$time_period &lt;- seq(from = as.Date(&quot;1/1/1901&quot;, &quot;%d/%m/%Y&quot;), to = as.Date(&quot;31/12/2015&quot;, &quot;%d/%m/%Y&quot;), by = &quot;month&quot;)
+
+
+##SMOOTHENING: LOESS
+
+decomp_2 &lt;- ggplot(rain_month, aes(x = time_period, y = rain)) +
+  geom_line() +
+  geom_smooth(method = &quot;loess&quot;, se = FALSE, span = 0.2, aes(colour = &quot;h=0.2&quot;)) +
+  geom_smooth(method = &quot;loess&quot;, se = FALSE, span = 0.4, aes(color = &quot;h=0.4&quot;)) +
+  geom_smooth(method = &quot;loess&quot;, se = FALSE, span = 0.6, aes(color = &quot;h=0.6&quot;)) +
+  geom_smooth(method = &quot;loess&quot;, se = FALSE, span = 0.8, aes(color = &quot;h=0.8&quot;)) +
+  geom_smooth(method = &quot;loess&quot;, se = FALSE, span = 1, aes(color = &quot;h=1&quot;)) +
+  scale_colour_manual(&quot;&quot;, 
+                      breaks = c(&quot;h=0.2&quot;,&quot;h=0.4&quot;,&quot;h=0.6&quot;,&quot;h=0.8&quot;,&quot;h=1&quot;),
+                      values = c(&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;,&quot;yellow&quot;,&quot;brown&quot;)) +
+  xlab(&quot; &quot;) +
+  labs(title=&quot;Different LOESS parameters&quot;) +
+  theme_classic()
+decomp_2</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>It is clear that LOESS smoothening is giving us a biased curve for all values of the parameter.</p>
+</div>
+<div id="is-the-series-stationary" class="section level3">
+<h3>Is the Series Stationary?</h3>
+<p>Making a time series stationary is required to fit a seasonal ARIMA model. A stationary time series in one which the mean and variances level remains near-constant, and the choice of time origin doesn’t change the overall movement of the time series. A time series has a trend, seasonal, and random part. A seasonal part of this time series obviously exists. Now, to determine the trend part.</p>
+<pre class="r"><code>reg &lt;- lm(ANNUAL ~ YEAR, rainDelhi)
+
+rain_yearly &lt;- ggplot(rainDelhi) +
+                    geom_line(aes(x = YEAR, y = ANNUAL)) +
+                    geom_abline(intercept = 646, slope = -0.059) +
+                    theme_classic()
+rain_yearly</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>VARIANCE around mean is 20215.02. The slope of the annual time series is -0.5 mm / 10 years, giving about a decrease of aprx 6.8 in the time period from 1901 to 2015.</p>
+<p>I used Kwiatkowski-Phillips-Schmidt-Shin (KPSS) to determine stationarity, and the Mann-Kendall test for monotonic trend detection.</p>
+<pre class="r"><code>library(trend)
+library(tseries)
+adf.test(rainbymonth)</code></pre>
+<pre><code>## 
+##  Augmented Dickey-Fuller Test
+## 
+## data:  rainbymonth
+## Dickey-Fuller = -9.2452, Lag order = 11, p-value = 0.01
+## alternative hypothesis: stationary</code></pre>
+<pre class="r"><code>kpss.test(rainbymonth, null=&quot;Trend&quot;)$p.value</code></pre>
+<pre><code>## [1] 0.1</code></pre>
+<pre class="r"><code>kpss.test(rainbymonth, null=&quot;Level&quot;)$p.value</code></pre>
+<pre><code>## [1] 0.1</code></pre>
+<pre class="r"><code>#stationarise
+rainComponents &lt;- decompose(rainbymonth)
+plot(rainComponents)</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<pre class="r"><code>rain_stat &lt;- rainbymonth - rainComponents$seasonal
+plot(rain_stat, main = &quot;monthy rain without seasonal component&quot;)</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
+<pre class="r"><code>##kendal test for trend result, for annual rainfall and monthly. 
+library(trend)
+
+
+
+kendall &lt;- mk.test(rainDelhi$ANNUAL)
+kendall$pvalg</code></pre>
+<pre><code>## [1] 0.8961508</code></pre>
+<pre class="r"><code>kendall2 &lt;- mk.test(rainbymonth)
+kendall2$pvalg</code></pre>
+<pre><code>## [1] 0.4752369</code></pre>
+<pre class="r"><code>cat(&quot;there there is no monotonic trend in the annual rainfall data&quot;) </code></pre>
+<pre><code>## there there is no monotonic trend in the annual rainfall data</code></pre>
+<p>After performing the Ljung-Box test for stationarity, I concluded that the monthly rain data is not sufficiently stationary. So I subtracted the seasonal part. After that, the test yields an acceptable p-value.</p>
+<pre class="r"><code>boxtest &lt;- Box.test(rainbymonth, lag = 12)
+boxtest$p.value</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>##stationarise time series by removing seasonal part
+
+rain_stat &lt;- rainbymonth - rainComponents$seasonal
+Box.test(rain_stat, lag = 12, type = &quot;Ljung-Box&quot;)</code></pre>
+<pre><code>## 
+##  Box-Ljung test
+## 
+## data:  rain_stat
+## X-squared = 18.167, df = 12, p-value = 0.1107</code></pre>
+</div>
+<div id="seasonal-differencing" class="section level3">
+<h3>Seasonal Differencing</h3>
+<p>The seasonal difference of a time series is the series of changes from one season to the next. For monthly data, in which there are 12 periods in a season, the seasonal difference of Y at period t is <span class="math inline">\(Y_t - Y_{t-12}\)</span>.</p>
+<pre class="r"><code>boxplot(rainbymonth~cycle(rainbymonth))</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<pre class="r"><code>acf(rainbymonth)</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-9-2.png" width="672" /></p>
+<pre class="r"><code>pacf(rainbymonth)</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-9-3.png" width="672" /></p>
+<p>Seasonal effect becomes apparent. Even though the mean value of each month apart from the june and july is quite different their variance is small. Hence, we have strong seasonal effect with a cycle of 12 months or less. The time series data should be seasonally differenced, (due to a few spikes in both the ACF and PACF that cut the 95% confidence limits), by order D=1, in order to eliminate seasonality.</p>
+<pre class="r"><code>rain_ts &lt;- rainbymonth
+
+rainbymonth &lt;- window(rain_ts, end = c(2004,12))
+raincheck &lt;- window(rain_ts, start = c(2005,1))
+
+
+rain_diff &lt;- diff(rainbymonth,36, difference = 1)
+rain_stat_diff &lt;- diff(rain_stat, 36, difference =1)
+
+Acf(rain_diff, lag.max = 50, main = &quot;ACF after seasonal differencing&quot;)</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code>Pacf(rain_diff, lag.max = 50, main = &quot;PACF after seasonal differencing&quot;)</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-10-2.png" width="672" /></p>
+<p>On inspection, it seems like a SARIMA model with seasonal parameters:</p>
+<ol style="list-style-type: decimal">
+<li>AR = 1 or 0</li>
+<li>MA = 1 or 0</li>
+</ol>
+<p>and non seasonal parameters:</p>
+<ol style="list-style-type: decimal">
+<li>AR = 0</li>
+<li>MA = 1 or 2</li>
+</ol>
+<p>So we run this model , and get the auto.arima model and compare results. The auto.arima model suggested <span class="math inline">\((0,0,0,2,1,1)_{12}\)</span>.</p>
+</div>
+<div id="model-fit" class="section level3">
+<h3>Model Fit</h3>
+<pre class="r"><code>library(astsa)
+model_1 &lt;- sarima(rainbymonth, 1,0,1,1,1,1,12)</code></pre>
+<pre><code>## initial  value 4.066829 
+## iter   2 value 3.864028
+## iter   3 value 3.812254
+## iter   4 value 3.761534
+## iter   5 value 3.741852
+## iter   6 value 3.738756
+## iter   7 value 3.737280
+## iter   8 value 3.734718
+## iter   9 value 3.734155
+## iter  10 value 3.733970
+## iter  11 value 3.733952
+## iter  12 value 3.733947
+## iter  13 value 3.733946
+## iter  14 value 3.733946
+## iter  15 value 3.733945
+## iter  16 value 3.733945
+## iter  17 value 3.733945
+## iter  18 value 3.733940
+## iter  19 value 3.733934
+## iter  20 value 3.733923
+## iter  21 value 3.733916
+## iter  22 value 3.733912
+## iter  23 value 3.733912
+## iter  23 value 3.733912
+## final  value 3.733912 
+## converged
+## initial  value 3.732315 
+## iter   2 value 3.731700
+## iter   3 value 3.730950
+## iter   4 value 3.730580
+## iter   5 value 3.730509
+## iter   6 value 3.730496
+## iter   7 value 3.730493
+## iter   8 value 3.730493
+## iter   9 value 3.730493
+## iter  10 value 3.730492
+## iter  11 value 3.730489
+## iter  12 value 3.730482
+## iter  13 value 3.730479
+## iter  14 value 3.730477
+## iter  15 value 3.730477
+## iter  16 value 3.730476
+## iter  17 value 3.730476
+## iter  18 value 3.730475
+## iter  19 value 3.730473
+## iter  20 value 3.730469
+## iter  21 value 3.730459
+## iter  22 value 3.730443
+## iter  23 value 3.730428
+## iter  24 value 3.730425
+## iter  25 value 3.730423
+## iter  26 value 3.730422
+## iter  27 value 3.730422
+## iter  27 value 3.730422
+## iter  27 value 3.730422
+## final  value 3.730422 
+## converged</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<pre class="r"><code>model_2 &lt;- sarima(rainbymonth, 0,0,0,2,1,0,12)</code></pre>
+<pre><code>## initial  value 4.070425 
+## iter   2 value 3.927099
+## iter   3 value 3.874484
+## iter   4 value 3.871906
+## iter   5 value 3.871527
+## iter   6 value 3.871527
+## iter   6 value 3.871527
+## iter   6 value 3.871527
+## final  value 3.871527 
+## converged
+## initial  value 3.866630 
+## iter   2 value 3.866613
+## iter   3 value 3.866612
+## iter   3 value 3.866612
+## iter   3 value 3.866612
+## final  value 3.866612 
+## converged</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-11-2.png" width="672" /></p>
+<pre class="r"><code>model_1</code></pre>
+<pre><code>## $fit
+## 
+## Call:
+## stats::arima(x = xdata, order = c(p, d, q), seasonal = list(order = c(P, D, 
+##     Q), period = S), xreg = constant, transform.pars = trans, fixed = fixed, 
+##     optim.control = list(trace = trc, REPORT = 1, reltol = tol))
+## 
+## Coefficients:
+##           ar1     ma1     sar1     sma1  constant
+##       -0.1324  0.1768  -0.0272  -0.9758    0.0023
+## s.e.   0.8471  0.8421   0.0296   0.0111    0.0041
+## 
+## sigma^2 estimated as 1687:  log likelihood = -6364.61,  aic = 12741.22
+## 
+## $degrees_of_freedom
+## [1] 1231
+## 
+## $ttable
+##          Estimate     SE  t.value p.value
+## ar1       -0.1324 0.8471  -0.1563  0.8758
+## ma1        0.1768 0.8421   0.2100  0.8337
+## sar1      -0.0272 0.0296  -0.9198  0.3579
+## sma1      -0.9758 0.0111 -88.1313  0.0000
+## constant   0.0023 0.0041   0.5477  0.5840
+## 
+## $AIC
+## [1] 10.2175
+## 
+## $AICc
+## [1] 10.21754
+## 
+## $BIC
+## [1] 10.24213</code></pre>
+<pre class="r"><code>model_2</code></pre>
+<pre><code>## $fit
+## 
+## Call:
+## stats::arima(x = xdata, order = c(p, d, q), seasonal = list(order = c(P, D, 
+##     Q), period = S), xreg = constant, transform.pars = trans, fixed = fixed, 
+##     optim.control = list(trace = trc, REPORT = 1, reltol = tol))
+## 
+## Coefficients:
+##          sar1     sar2  constant
+##       -0.6578  -0.3339    0.0064
+## s.e.   0.0269   0.0270    0.0571
+## 
+## sigma^2 estimated as 2272:  log likelihood = -6532.94,  aic = 13073.88
+## 
+## $degrees_of_freedom
+## [1] 1233
+## 
+## $ttable
+##          Estimate     SE  t.value p.value
+## sar1      -0.6578 0.0269 -24.4354  0.0000
+## sar2      -0.3339 0.0270 -12.3630  0.0000
+## constant   0.0064 0.0571   0.1119  0.9109
+## 
+## $AIC
+## [1] 10.48427
+## 
+## $AICc
+## [1] 10.48428
+## 
+## $BIC
+## [1] 10.50069</code></pre>
+<pre class="r"><code>auto.arima(rainbymonth, trace=TRUE, seasonal = TRUE)</code></pre>
+<pre><code>## 
+##  Fitting models using approximations to speed things up...
+## 
+##  ARIMA(2,0,2)(1,1,1)[12] with drift         : Inf
+##  ARIMA(0,0,0)(0,1,0)[12] with drift         : 13457.89
+##  ARIMA(1,0,0)(1,1,0)[12] with drift         : 13125.87
+##  ARIMA(0,0,1)(0,1,1)[12] with drift         : Inf
+##  ARIMA(0,0,0)(0,1,0)[12]                    : 13455.89
+##  ARIMA(1,0,0)(0,1,0)[12] with drift         : 13459.85
+##  ARIMA(1,0,0)(2,1,0)[12] with drift         : 12991.15
+##  ARIMA(1,0,0)(2,1,1)[12] with drift         : Inf
+##  ARIMA(1,0,0)(1,1,1)[12] with drift         : Inf
+##  ARIMA(0,0,0)(2,1,0)[12] with drift         : 12988.55
+##  ARIMA(0,0,0)(1,1,0)[12] with drift         : 13122.86
+##  ARIMA(0,0,0)(2,1,1)[12] with drift         : Inf
+##  ARIMA(0,0,0)(1,1,1)[12] with drift         : Inf
+##  ARIMA(0,0,1)(2,1,0)[12] with drift         : 12990.16
+##  ARIMA(1,0,1)(2,1,0)[12] with drift         : 12993.16
+##  ARIMA(0,0,0)(2,1,0)[12]                    : 12986.55
+##  ARIMA(0,0,0)(1,1,0)[12]                    : 13120.86
+##  ARIMA(0,0,0)(2,1,1)[12]                    : Inf
+##  ARIMA(0,0,0)(1,1,1)[12]                    : Inf
+##  ARIMA(1,0,0)(2,1,0)[12]                    : 12989.14
+##  ARIMA(0,0,1)(2,1,0)[12]                    : 12988.15
+##  ARIMA(1,0,1)(2,1,0)[12]                    : 12991.15
+## 
+##  Now re-fitting the best model(s) without approximations...
+## 
+##  ARIMA(0,0,0)(2,1,0)[12]                    : 13071.91
+## 
+##  Best model: ARIMA(0,0,0)(2,1,0)[12]</code></pre>
+<pre><code>## Series: rainbymonth 
+## ARIMA(0,0,0)(2,1,0)[12] 
+## 
+## Coefficients:
+##          sar1     sar2
+##       -0.6578  -0.3339
+## s.e.   0.0269   0.0270
+## 
+## sigma^2 estimated as 2275:  log likelihood=-6532.95
+## AIC=13071.89   AICc=13071.91   BIC=13087.25</code></pre>
+<pre class="r"><code>##predicting
+prediction_1 &lt;- sarima.for(rainbymonth, 132,1,0,1,1,1,1,12)</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-11-3.png" width="672" /></p>
+<pre class="r"><code>prediction_2 &lt;- sarima.for(rainbymonth, 132,0,0,0,2,1,0,12)</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-11-4.png" width="672" /></p>
+<pre class="r"><code>library(forecast)
+#fit &lt;- auto.arima(rainbymonth,max.p = 5,max.q = 5,max.P = 5,max.Q = 5,max.d = 3,seasonal = TRUE,ic = &#39;aicc&#39;)
+#plot(forecast(fit,h=20))
+#hist(fit$residuals)</code></pre>
+<p>A fitted model should be subjected to diagnostic checking with a view to ascertaining its goodness-of-fit to the data. This is done by analysing its residuals. An adequate model should have uncorrelated residuals. This is the minimal condition. The optimal condition is that the residuals should follow a Gaussian distribution with mean zero. The residuals resemble white noise which is a good indication.</p>
+<p>Now I plot the actual values predictied from 1901 - 2004 for 2005-2015 against the actual data of 2005-2015.</p>
+<pre class="r"><code>format &lt;- function(x) {
+  temp &lt;- unlist(as.list(t(as.matrix(x))))
+  temp &lt;- as.data.table(temp)
+  temp$time &lt;- 1:nrow(temp)
+  return(temp)
+}
+             
+predict_1 &lt;-format(prediction_1$pred)
+predict_2 &lt;- format(prediction_2$pred)
+raincheck &lt;- format(raincheck)
+
+##prediction frame:
+predict_1$se &lt;- unlist(as.list(t(as.matrix(prediction_1$pred))))
+predict_1$lower &lt;- predict_1$temp - 1.96*predict_1$se
+predict_1$upper &lt;- predict_1$temp + 1.96*predict_1$se
+                                
+
+ggplot() +
+  geom_line(data = predict_1,aes(x=time,y = temp, colour = &quot;model1&quot;)) +
+  geom_line(data = predict_2,aes(x=time,y = temp, colour = &quot;model2&quot;)) +
+  geom_line(data = raincheck,aes(x=time,y = temp, colour = &quot;truth&quot;)) +
+    scale_colour_manual(&quot;&quot;, 
+                        breaks = c(&quot;model1&quot;,&quot;model2&quot;,&quot;truth&quot;),
+                        values = c(&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;)) +
+    geom_ribbon(data=predict_1,aes(x = time,ymin=lower,ymax=upper),alpha=0.3) +
+    labs(title=&quot;Prediction v Truth with 95% confidence bands&quot;) +
+    theme_classic()</code></pre>
+<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>The predictions seem not too far from the truth, and within the confidence intervals. The AIC’s for the SARIMA models are almost identical.</p>
+</div>
+<div id="conclusion" class="section level3">
+<h3>Conclusion:</h3>
+<ol style="list-style-type: decimal">
+<li><p>Rainfall in Delhi is highly seasonal, with peak during July and June.</p></li>
+<li><p>There is no ascertainable overall monotonic trend in the data.</p></li>
+<li><p>Series can be made sufficiently stationary by subtracting the seasonal component, and by differencing (degree 1) over a frequency of 12 months.</p></li>
+<li><p>SARIMA models are adequate in predicting weather forecasts.</p></li>
+</ol>
+</div>
+</div>
+
+    </div>
+
+    
+
+
+
+
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=/post/rainfall-analysis/timeseriesproject/&amp;text=Rainfall%20in%20New%20Delhi,%20India:%201901%20-%202015" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=/post/rainfall-analysis/timeseriesproject/&amp;t=Rainfall%20in%20New%20Delhi,%20India:%201901%20-%202015" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=Rainfall%20in%20New%20Delhi,%20India:%201901%20-%202015&amp;body=/post/rainfall-analysis/timeseriesproject/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=/post/rainfall-analysis/timeseriesproject/&amp;title=Rainfall%20in%20New%20Delhi,%20India:%201901%20-%202015" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://web.whatsapp.com/send?text=Rainfall%20in%20New%20Delhi,%20India:%201901%20-%202015%20/post/rainfall-analysis/timeseriesproject/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=/post/rainfall-analysis/timeseriesproject/&amp;title=Rainfall%20in%20New%20Delhi,%20India:%201901%20-%202015" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+      
+      <img class="avatar mr-3 avatar-circle" src="/authors/admin/avatar_hu21b1ecab893026c8ae52f4df535b0e49_2501376_270x270_fill_q90_lanczos_center.jpg" alt="Avatar">
+    
+
+    <div class="media-body">
+      <h5 class="card-title"><a href="/">Malvika Rajeev</a></h5>
+      
+      <p class="card-text">I&rsquo;m a statistician and I look for cool datasets to explore.</p>
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="/#contact" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://twitter.com/malvikarajeev" target="_blank" rel="noopener">
+        <i class="fab fa-twitter"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/malvikarajeev" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://linkedin/in/malvikarajeev" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+        
+      
+
+    
+
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js" integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin="anonymous"></script>
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    <script>const isSiteThemeDark = true;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.a8d7005002cb4a052fd6d721e83df9ba.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+  <p class="powered-by">
+    
+      <a href="/privacy/">Privacy Policy</a>
+    
+    
+       &middot; 
+      <a href="/terms/">Terms</a>
+    
+  </p>
+  
+
+  <p class="powered-by">
+    
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.7.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Malvika Rajeev">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="requesting data from uber The purpose of this exercise is to visualise how I use my uber data. Uber records are pretty useful - just ask uber to email you your data: https://help.uber.com/driving-and-delivering/article/request-your-personal-uber-data?nodeId=fbf08e68-65ba-456b-9bc6-1369eb9d2c44
+I’m removing remore 2020 and 2015 (it contains only one day) for now becuase it might skew the data.
+ reading in the data myrides = read.csv(&quot;https://raw.githubusercontent.com/malvikarajeev/uberAnalysis/master/trips_data.csv&quot;) head(myrides) ## City Product.Type Trip.or.Order.Status ## 1 Los Angeles UberX COMPLETED ## 2 Los Angeles UberX COMPLETED ## 3 Los Angeles UberX COMPLETED ## 4 Los Angeles UberX COMPLETED ## 5 Los Angeles UberX COMPLETED ## 6 Los Angeles UberX DRIVER_CANCELED ## Request.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/uberanalysis/uberanalysis/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#EAF04E">
+  
+
+  
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css" integrity="sha256-4w9DunooKSr3MFXHXWyFER38WmPdm361bQS/2KUWZbU=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin="anonymous" title="hl-light" disabled>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark">
+        
+      
+    
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin="anonymous">
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+        
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.css">
+
+  
+
+
+
+
+  
+
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="/post/uberanalysis/uberanalysis/">
+
+  
+  
+  
+  
+  
+    
+  
+  
+  <meta property="twitter:card" content="summary_large_image">
+  
+  <meta property="twitter:site" content="@malvikarajeev">
+  <meta property="twitter:creator" content="@malvikarajeev">
+  
+  <meta property="og:site_name" content="what dat data do?">
+  <meta property="og:url" content="/post/uberanalysis/uberanalysis/">
+  <meta property="og:title" content="uber data | what dat data do?">
+  <meta property="og:description" content="requesting data from uber The purpose of this exercise is to visualise how I use my uber data. Uber records are pretty useful - just ask uber to email you your data: https://help.uber.com/driving-and-delivering/article/request-your-personal-uber-data?nodeId=fbf08e68-65ba-456b-9bc6-1369eb9d2c44
+I’m removing remore 2020 and 2015 (it contains only one day) for now becuase it might skew the data.
+ reading in the data myrides = read.csv(&quot;https://raw.githubusercontent.com/malvikarajeev/uberAnalysis/master/trips_data.csv&quot;) head(myrides) ## City Product.Type Trip.or.Order.Status ## 1 Los Angeles UberX COMPLETED ## 2 Los Angeles UberX COMPLETED ## 3 Los Angeles UberX COMPLETED ## 4 Los Angeles UberX COMPLETED ## 5 Los Angeles UberX COMPLETED ## 6 Los Angeles UberX DRIVER_CANCELED ## Request."><meta property="og:image" content="/img/cover_photo.jpg">
+  <meta property="twitter:image" content="/img/cover_photo.jpg"><meta property="og:locale" content="en-us">
+  
+    
+    
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/post/uberanalysis/uberanalysis/"
+  },
+  "headline": "uber data",
+  
+  "datePublished": "0001-01-01T00:00:00Z",
+  "dateModified": "0001-01-01T00:00:00Z",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Malvika Rajeev"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "what dat data do?",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png"
+    }
+  },
+  "description": "requesting data from uber The purpose of this exercise is to visualise how I use my uber data. Uber records are pretty useful - just ask uber to email you your data: https://help.uber.com/driving-and-delivering/article/request-your-personal-uber-data?nodeId=fbf08e68-65ba-456b-9bc6-1369eb9d2c44\nI’m removing remore 2020 and 2015 (it contains only one day) for now becuase it might skew the data.\n reading in the data myrides = read.csv(\u0026quot;https://raw.githubusercontent.com/malvikarajeev/uberAnalysis/master/trips_data.csv\u0026quot;) head(myrides) ## City Product.Type Trip.or.Order.Status ## 1 Los Angeles UberX COMPLETED ## 2 Los Angeles UberX COMPLETED ## 3 Los Angeles UberX COMPLETED ## 4 Los Angeles UberX COMPLETED ## 5 Los Angeles UberX COMPLETED ## 6 Los Angeles UberX DRIVER_CANCELED ## Request."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>uber data | what dat data do?</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" class="dark">
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-end" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#contact"><span>Contact</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+      <li class="nav-item">
+        <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>uber data</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Jan 1, 0001
+  </span>
+  
+
+  
+
+  
+
+  
+  
+  
+
+  
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
+
+
+<div id="requesting-data-from-uber" class="section level2">
+<h2>requesting data from uber</h2>
+<p>The purpose of this exercise is to visualise how I use my uber data. Uber records are pretty useful - just ask uber to email you your data: <a href="https://help.uber.com/driving-and-delivering/article/request-your-personal-uber-data?nodeId=fbf08e68-65ba-456b-9bc6-1369eb9d2c44" class="uri">https://help.uber.com/driving-and-delivering/article/request-your-personal-uber-data?nodeId=fbf08e68-65ba-456b-9bc6-1369eb9d2c44</a></p>
+<p>I’m removing remore 2020 and 2015 (it contains only one day) for now becuase it might skew the data.</p>
+</div>
+<div id="reading-in-the-data" class="section level2">
+<h2>reading in the data</h2>
+<pre class="r"><code>myrides = read.csv(&quot;https://raw.githubusercontent.com/malvikarajeev/uberAnalysis/master/trips_data.csv&quot;)
+
+head(myrides)</code></pre>
+<pre><code>##          City Product.Type Trip.or.Order.Status
+## 1 Los Angeles        UberX            COMPLETED
+## 2 Los Angeles        UberX            COMPLETED
+## 3 Los Angeles        UberX            COMPLETED
+## 4 Los Angeles        UberX            COMPLETED
+## 5 Los Angeles        UberX            COMPLETED
+## 6 Los Angeles        UberX      DRIVER_CANCELED
+##                    Request.Time               Begin.Trip.Time
+## 1 2020-02-17 04:43:38 +0000 UTC 2020-02-17 04:52:00 +0000 UTC
+## 2 2020-02-17 01:17:06 +0000 UTC 2020-02-17 01:19:19 +0000 UTC
+## 3 2020-02-16 20:29:34 +0000 UTC 2020-02-16 20:35:00 +0000 UTC
+## 4 2020-02-16 18:45:42 +0000 UTC 2020-02-16 18:51:31 +0000 UTC
+## 5 2020-02-16 00:17:16 +0000 UTC 2020-02-16 00:23:12 +0000 UTC
+## 6 2020-02-15 23:36:22 +0000 UTC 1970-01-01 00:00:00 +0000 UTC
+##   Begin.Trip.Lat Begin.Trip.Lng
+## 1       34.08361      -118.3521
+## 2       33.99775      -118.4748
+## 3       33.96174      -118.3673
+## 4       33.98221      -118.4594
+## 5       34.01283      -118.4966
+## 6       34.01028      -118.4934
+##                                 Begin.Trip.Address
+## 1      7422 Melrose Ave, Los Angeles, CA 90046, US
+## 2               423 Rose Ave, Venice, CA 90291, US
+## 3   621 W Manchester Blvd, Inglewood, CA 90301, US
+## 4 4100 Admiralty Way, Marina del Rey, CA 90292, US
+## 5         111 Broadway, Santa Monica, CA 90401, US
+## 6                                                 
+##                    Dropoff.Time Dropoff.Lat Dropoff.Lng
+## 1 2020-02-17 05:01:35 +0000 UTC    34.09819   -118.3077
+## 2 2020-02-17 01:29:59 +0000 UTC    33.98216   -118.4595
+## 3 2020-02-16 20:55:09 +0000 UTC    33.97935   -118.4664
+## 4 2020-02-16 19:07:13 +0000 UTC    33.96225   -118.3671
+## 5 2020-02-16 00:46:38 +0000 UTC    33.98220   -118.4595
+## 6 1970-01-01 00:00:00 +0000 UTC    34.01351   -118.4972
+##                                                                                Dropoff.Address
+## 1                                                5419 W Sunset Blvd, Los Angeles, CA 90027, US
+## 2                                             4100 Admiralty Way, Marina del Rey, CA 90292, US
+## 3 Venice Beach Pier Public Parkingl Lot, Unnamed Road, Marina Del Rey, CA 90292, United States
+## 4                                               621 W Manchester Blvd, Inglewood, CA 90301, US
+## 5                                             4100 Admiralty Way, Marina del Rey, CA 90292, US
+## 6                                             4100 Admiralty Way, Marina del Rey, CA 90292, US
+##   Distance..miles. Fare.Amount Fare.Currency
+## 1             3.56        9.14           USD
+## 2             2.21        7.43           USD
+## 3             7.27       11.65           USD
+## 4             7.24       10.63           USD
+## 5             3.81       10.30           USD
+## 6             0.00        5.00           USD</code></pre>
+<pre class="r"><code>myrides$completed = ifelse(myrides$Trip.or.Order.Status == &#39;COMPLETED&#39;, T, F)
+
+##basic eda
+
+myrides$time_started = as.POSIXct(strptime(myrides$Begin.Trip.Time, &quot;%Y-%m-%d %H:%M:%S&quot;))
+
+myrides$year = year(myrides$time_started)
+##remove 1970 and not completed
+
+myrides = myrides %&gt;% filter(!(year == 1970 | year == 2020 | year == 2015))
+myrides = myrides %&gt;% filter(Product.Type != &#39;UberEATS Marketplace&#39;)
+myrides = myrides %&gt;% filter(completed == T)
+myrides$month_year = format(as.Date(myrides$Begin.Trip.Time), &quot;%Y-%m&quot;)</code></pre>
+<pre class="r"><code>ggplot(myrides, aes(x = month_year)) + 
+  geom_bar(aes(fill = as.factor(year))) + 
+  scale_fill_brewer(palette=&quot;Set1&quot;) +
+  theme_tufte() +
+  theme(axis.text.x = element_blank()) + 
+  labs(y = &#39;Frequency of Rides&#39;, x = &#39;Time Period&#39;) +
+  scale_fill_discrete(name = &quot;Year&quot;)</code></pre>
+<pre><code>## Scale for &#39;fill&#39; is already present. Adding another scale for &#39;fill&#39;,
+## which will replace the existing scale.</code></pre>
+<p><img src="/malvikarajeev.github.io/post/uberAnalysis/uberAnalysis_files/figure-html/prelim-1.png" width="672" /></p>
+<p>Seems like on an avergae I took about 10-20 rides a month, seemingly growing with every year. there seems to be a coherent pattern in that number of rides increase monotically as we move from January to February (except for in 2018). The month of September-November seems generally low.</p>
+<p>Now, I moved from New Delhi, India, to Berkeley, California, in the month of August, 2018. Can we see this move reflect different patterns?</p>
+</div>
+<div id="average-trip-time." class="section level2">
+<h2>average trip time.</h2>
+<pre class="r"><code>myrides$time_ended = as.POSIXct(strptime(myrides$Dropoff.Time, &quot;%Y-%m-%d %H:%M:%S&quot;))
+myrides$duration_mins = myrides$time_ended - myrides$time_started
+myrides$duration_mins = as.integer(myrides$duration_mins)
+
+ggplot(myrides, aes(y = duration_mins, x = month_year)) + geom_boxplot() +
+  theme_tufte() +
+  theme(axis.text.x = element_blank()) + 
+  labs(y = &#39;Distribution of Rides&#39;, x = &#39;Time Period&#39;) +
+  scale_fill_discrete(name = &quot;Year&quot;)</code></pre>
+<p><img src="/malvikarajeev.github.io/post/uberAnalysis/uberAnalysis_files/figure-html/avg_time-1.png" width="672" /></p>
+<p>The average time of my rides is decreasing: perhaps it makes sense, the traffic in New Delhi is insane comapred to the traffic in Berkeley.</p>
+</div>
+<div id="fare-habits" class="section level2">
+<h2>fare habits</h2>
+<p>I wanted to group by year, and get the cumulative fare for each year by month. In the pursuit of this, I found a function called <code>ave</code></p>
+<pre class="r"><code>fare_wise = function(currency){
+  fares = myrides %&gt;%
+          filter(Fare.Currency == currency) %&gt;%
+          group_by(year, month_year) %&gt;% 
+          summarise(monthly_fare = sum(Fare.Amount, na.rm = T))
+  fares$cumulative_fare = ave(fares$monthly_fare, fares$year, FUN = cumsum)
+  return(fares)
+}
+
+inr = fare_wise(&#39;INR&#39;)
+##Adding year
+
+##
+
+
+ggplot(inr) +
+  geom_point(aes(y = cumulative_fare, x = month_year, color = factor(year))) + 
+  theme_tufte() +
+  transition_states(year, wrap = T) </code></pre>
+<p><img src="/malvikarajeev.github.io/post/uberAnalysis/uberAnalysis_files/figure-html/animation1-1.gif" /><!-- --></p>
+<pre class="r"><code>  # labs(title = &quot;Year: {frame_time}&quot;) +
+  # view_follow(fixed_x = T)
+
+# anim_save(&quot;inr.gif&quot;, animation = gg, path = &quot;/figures&quot;)</code></pre>
+<!-- ![Spending Habits](/figures/inr.gif) -->
+<p>What the hell was I doing in 2017… damn.</p>
+<pre class="r"><code>temp = myrides %&gt;% filter(Begin.Trip.Lat * Begin.Trip.Lng != Dropoff.Lat*Dropoff.Lng) %&gt;% filter(Fare.Currency == &#39;USD&#39;)
+
+
+
+usa_map = map_data(&quot;county&quot;)
+
+ca_df &lt;- usa_map %&gt;% filter(region == &#39;california&#39;)
+
+# ggplot() + 
+#   geom_polygon(data = ca_df, aes(x=long, y = lat)) +
+#   coord_fixed(1.3) +
+#   geom_curve(data=temp,
+#              aes(x=Begin.Trip.Lng, y=Begin.Trip.Lat, xend=Dropoff.Lng, yend=Dropoff.Lat),
+#              col = &quot;#b29e7d&quot;, size = 1, curvature = .2) +
+#   geom_point(data=temp,
+#              aes(x=Dropoff.Lng, y=Dropoff.Lat), 
+#              colour=&quot;blue&quot;,
+#              size=1.5) +
+#   geom_point(data=temp,
+#              aes(x=Begin.Trip.Lng, y=Begin.Trip.Lat), 
+#              colour=&quot;blue&quot;) +
+#   theme(axis.line=element_blank(),
+#         axis.text.x=element_blank(),
+#         axis.text.y=element_blank(),
+#         axis.title.x=element_blank(),
+#         axis.title.y=element_blank(),
+#         axis.ticks=element_blank(),
+#         plot.title=element_text(hjust=0.5, size=12))</code></pre>
+<pre class="r"><code>library(shiny)
+library(ggmap)
+library(ggplot2)
+
+ui &lt;- fluidPage(
+  titlePanel(&quot;My Uber Rides&quot;),
+  
+  sidebarLayout(
+    # sidebarPanel(
+    #   radioButtons(&quot;radio&quot;, label = h4(&quot;Choose currency&quot;),
+    # choices = list(&quot;USD&quot; = &#39;USD&#39;, &quot;INR&quot; = &#39;INR&#39;)), 
+    
+      # radioButtons(&quot;interval&quot;, label = h4(&quot;show time of day?&quot;),
+      #              choices = list(&quot;Yes&quot; = TRUE, &quot;No&quot; = FALSE)),
+
+      
+      selectInput(&quot;month_year&quot;, label = &quot;Choose Month and Year&quot;,
+                  choices = unique(temp$month_year)),
+                 
+      
+      sliderInput(&quot;duration_ride&quot;, &quot;Duration of Rides&quot;, min = 1, max = max(temp$duration), value = c(1,10))
+    ),
+    
+    mainPanel(plotOutput(outputId = &quot;my_map&quot;)
+    
+  )
+)
+)
+
+#load()
+
+server &lt;- function(input, output) {
+  
+  outputR = reactive({
+    req(input$duration_ride)
+    req(input$month_year)
+    temp2 = temp%&gt;% filter(duration_mins &lt;= input$duration_ride[2] &amp; duration_mins &gt;= input$duration_ride[1]) %&gt;% filter(month_year == input$month_year)
+    
+    
+    usa_map = map_data(&quot;county&quot;)
+
+    ca_df &lt;- usa_map %&gt;% filter(region == &#39;california&#39;)
+  long = mean(temp2$Dropoff.Lng, na.rm = T)
+  latt = mean(temp2$Dropoff.Lat, na.rm = T)
+  g = ggmap(get_googlemap(c(long, latt),
+                    zoom = 15 , scale = 2,
+                    maptype =&#39;roadmap&#39;,
+                    color = &#39;color&#39;, archiving = T)) +
+    
+    geom_segment(data=temp2,
+              aes(x=Begin.Trip.Lng, y=Begin.Trip.Lat, xend=Dropoff.Lng, yend=Dropoff.Lat),
+              col = &quot;black&quot;, size = 0.3, arrow = arrow()) +
+  geom_point(data=temp2,
+             aes(x=Dropoff.Lng, y=Dropoff.Lat, 
+             colour=&quot;red&quot;),
+             alpha = 0.5) +
+  geom_point(data=temp2,
+             aes(x=Begin.Trip.Lng, y=Begin.Trip.Lat, 
+             colour=&quot;blue&quot;), alpha = 0.5) + 
+    scale_color_identity(
+                          breaks = c(&quot;red&quot;, &quot;blue&quot;),
+                          labels = c(&quot;Drop off Point&quot;, &quot;Pick up point&quot;),
+                          guide = &quot;legend&quot;) 
+    
+    
+  
+  g
+   
+  })
+  
+  output$my_map= renderPlot({outputR()})
+}
+
+shinyApp(ui = ui, server = server)</code></pre>
+<iframe width height="400" scrolling="no" frameborder="no" src="https://malvika.shinyapps.io/ubershiny/" allowfullscreen="true">
+</iframe>
+</div>
+
+    </div>
+
+    
+
+
+
+
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=/post/uberanalysis/uberanalysis/&amp;text=uber%20data" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=/post/uberanalysis/uberanalysis/&amp;t=uber%20data" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=uber%20data&amp;body=/post/uberanalysis/uberanalysis/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=/post/uberanalysis/uberanalysis/&amp;title=uber%20data" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://web.whatsapp.com/send?text=uber%20data%20/post/uberanalysis/uberanalysis/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=/post/uberanalysis/uberanalysis/&amp;title=uber%20data" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+      
+      <img class="avatar mr-3 avatar-circle" src="/authors/admin/avatar_hu21b1ecab893026c8ae52f4df535b0e49_2501376_270x270_fill_q90_lanczos_center.jpg" alt="Avatar">
+    
+
+    <div class="media-body">
+      <h5 class="card-title"><a href="/">Malvika Rajeev</a></h5>
+      
+      <p class="card-text">I&rsquo;m a statistician and I look for cool datasets to explore.</p>
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="/#contact" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://twitter.com/malvikarajeev" target="_blank" rel="noopener">
+        <i class="fab fa-twitter"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/malvikarajeev" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://linkedin/in/malvikarajeev" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+        
+      
+
+    
+
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js" integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin="anonymous"></script>
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    <script>const isSiteThemeDark = true;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.a8d7005002cb4a052fd6d721e83df9ba.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+  <p class="powered-by">
+    
+      <a href="/privacy/">Privacy Policy</a>
+    
+    
+       &middot; 
+      <a href="/terms/">Terms</a>
+    
+  </p>
+  
+
+  <p class="powered-by">
+    
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

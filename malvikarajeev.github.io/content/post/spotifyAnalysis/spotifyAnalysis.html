@@ -1,0 +1,49 @@
+---
+title: "Spotify!"
+author: "Malvika Rajeev"
+output: html_document
+runtime: shiny
+---
+
+
+
+<p>So a while ago my friend who just started using RStudio and is a bit overexcited about working with data told me about getting all your spotify data is totally doable, all you gotta do is email spotify. Follow the link here for more details: <a href="https://support.spotify.com/ca-en/article/data-rights-and-privacy-settings/" class="uri">https://support.spotify.com/ca-en/article/data-rights-and-privacy-settings/</a></p>
+<p>Spotify will email your data in a zip format in JSON files. I use the jsonlite package in R to read the data in.</p>
+<pre class="r"><code>urlspot = &quot;https://raw.githubusercontent.com/malvikarajeev/spotifyAnalysis/master/&quot;
+
+spot0 = jsonlite::read_json(paste(urlspot,&quot;StreamingHistory0.json&quot;, sep = &quot;&quot;), simplifyVector = T)
+
+spot1 = jsonlite::read_json(paste(urlspot,&quot;StreamingHistory1.json&quot;, sep = &quot;&quot;), simplifyVector = T)
+
+spot = rbind(spot0, spot1)</code></pre>
+<p>The data is pretty straightforward: the time the track ended streaming, artist and track name, and the milliseconds it was listened to. I’ll use shiny to visualise my streaming trends.</p>
+<div id="section-using-lubridate-to-get-end-times" class="section level2">
+<h2>using lubridate to get end times</h2>
+<pre class="r"><code>spot$end_time = as.POSIXct(strptime(spot$endTime, &quot;%Y-%m-%d %H:%M&quot;))
+spot$date = date(spot$end_time)
+spot$month = month(spot$date, label = T)
+
+customm = function(date){
+  temp = strsplit(date, &#39; &#39;) %&gt;% unlist
+  temp2 = temp[2]
+  return(temp2)
+}
+  
+  
+  
+  
+spot$only_time = parse_time(sapply(spot$endTime, customm))</code></pre>
+<pre class="r"><code>my_seconds &lt;- period_to_seconds(hms(spot$only_time))
+myIntervals &lt;- c(&quot;0 AM - 6 AM&quot;, &quot;6 AM - 12 PM&quot;, &quot;12 PM - 6 PM&quot;, &quot;6 PM - 0 AM&quot;)
+spot$interval &lt;- myIntervals[findInterval(my_seconds, c(0, 6, 12, 18, 24) * 3600)]
+
+##I want to group by interval, trackName, sum up the milliseconds, and get highest milisecond for each interval arrranged by trackname
+
+interval_artist = spot %&gt;% group_by(interval, trackName) %&gt;% summarise(s = sum(msPlayed)) %&gt;% arrange(-s) %&gt;% top_n(20, s)</code></pre>
+<p>For shiny documents/chunks, make sure cache = FALSE. Markdown can’t cache shiny stuff since the <code>reactive</code> function already does that.</p>
+<p>Shiny can be used to create some pretty interactive visualisations. I wanted to see what kind of music I listen to monthly, and what times. A simple if-else clause in your ggplot can simplify visualisation according to user specification.</p>
+<iframe src>
+</iframe>
+<iframe width height="400" scrolling="no" frameborder="no" src="https://malvika.shinyapps.io/spotifyshiny/" allowfullscreen="true">
+</iframe>
+</div>

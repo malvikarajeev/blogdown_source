@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.7.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Malvika Rajeev">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="This data analysis was undertaken as a part of the Cal’s Stat 215A.
+##Please set path before running: path to where the main data is ##libraries: library(kableExtra) library(dbscan) library(factoextra) library(fastcluster) library(FactoMineR) library(NbClust) library(tidyverse) library(magrittr) library(cluster) library(cowplot) library(NbClust) library(clValid) library(ggfortify) library(clustree) library(dendextend) library(factoextra) library(FactoMineR) library(corrplot) library(GGally) library(knitr) library(kableExtra) library(gplots) library(wesanderson) library(ggplot2) library(tidyverse) library(maps) library(crosstalk) library(readr) library(gridExtra) library(leaflet) library(MASS) library(Rtsne) library(irlba) state_df &lt;- map_data(&quot;state&quot;) my_map_theme &lt;- theme_void() # load the data ling_data &lt;- read.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/linguistic-survey-data-can-we-detect-regionalities/linguisticsurvey/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#EAF04E">
+  
+
+  
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css" integrity="sha256-4w9DunooKSr3MFXHXWyFER38WmPdm361bQS/2KUWZbU=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin="anonymous" title="hl-light" disabled>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark">
+        
+      
+    
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin="anonymous">
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+        
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.css">
+
+  
+
+
+
+
+  
+
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="/post/linguistic-survey-data-can-we-detect-regionalities/linguisticsurvey/">
+
+  
+  
+  
+  
+  
+    
+  
+  
+  <meta property="twitter:card" content="summary_large_image">
+  
+  <meta property="twitter:site" content="@malvikarajeev">
+  <meta property="twitter:creator" content="@malvikarajeev">
+  
+  <meta property="og:site_name" content="what dat data do?">
+  <meta property="og:url" content="/post/linguistic-survey-data-can-we-detect-regionalities/linguisticsurvey/">
+  <meta property="og:title" content="Linguistic Data Analysis | what dat data do?">
+  <meta property="og:description" content="This data analysis was undertaken as a part of the Cal’s Stat 215A.
+##Please set path before running: path to where the main data is ##libraries: library(kableExtra) library(dbscan) library(factoextra) library(fastcluster) library(FactoMineR) library(NbClust) library(tidyverse) library(magrittr) library(cluster) library(cowplot) library(NbClust) library(clValid) library(ggfortify) library(clustree) library(dendextend) library(factoextra) library(FactoMineR) library(corrplot) library(GGally) library(knitr) library(kableExtra) library(gplots) library(wesanderson) library(ggplot2) library(tidyverse) library(maps) library(crosstalk) library(readr) library(gridExtra) library(leaflet) library(MASS) library(Rtsne) library(irlba) state_df &lt;- map_data(&quot;state&quot;) my_map_theme &lt;- theme_void() # load the data ling_data &lt;- read."><meta property="og:image" content="/img/cover_photo.jpg">
+  <meta property="twitter:image" content="/img/cover_photo.jpg"><meta property="og:locale" content="en-us">
+  
+    
+    
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/post/linguistic-survey-data-can-we-detect-regionalities/linguisticsurvey/"
+  },
+  "headline": "Linguistic Data Analysis",
+  
+  "datePublished": "0001-01-01T00:00:00Z",
+  "dateModified": "0001-01-01T00:00:00Z",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Malvika Rajeev"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "what dat data do?",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png"
+    }
+  },
+  "description": "This data analysis was undertaken as a part of the Cal’s Stat 215A.\n##Please set path before running: path to where the main data is ##libraries: library(kableExtra) library(dbscan) library(factoextra) library(fastcluster) library(FactoMineR) library(NbClust) library(tidyverse) library(magrittr) library(cluster) library(cowplot) library(NbClust) library(clValid) library(ggfortify) library(clustree) library(dendextend) library(factoextra) library(FactoMineR) library(corrplot) library(GGally) library(knitr) library(kableExtra) library(gplots) library(wesanderson) library(ggplot2) library(tidyverse) library(maps) library(crosstalk) library(readr) library(gridExtra) library(leaflet) library(MASS) library(Rtsne) library(irlba) state_df \u0026lt;- map_data(\u0026quot;state\u0026quot;) my_map_theme \u0026lt;- theme_void() # load the data ling_data \u0026lt;- read."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Linguistic Data Analysis | what dat data do?</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" class="dark">
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-end" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#contact"><span>Contact</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+      <li class="nav-item">
+        <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Linguistic Data Analysis</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Jan 1, 0001
+  </span>
+  
+
+  
+
+  
+
+  
+  
+  
+
+  
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
+
+
+
+<p><em>This data analysis was undertaken as a part of the Cal’s Stat 215A.</em></p>
+<pre class="r"><code>##Please set path before running: path to where the main data is
+
+##libraries:
+library(kableExtra)
+library(dbscan)
+library(factoextra)
+library(fastcluster)
+library(FactoMineR)
+library(NbClust)
+library(tidyverse)
+library(magrittr)
+library(cluster)
+library(cowplot)
+library(NbClust)
+library(clValid)
+library(ggfortify)
+library(clustree)
+library(dendextend)
+library(factoextra)
+library(FactoMineR)
+library(corrplot)
+library(GGally)
+library(knitr)
+library(kableExtra)
+library(gplots)
+library(wesanderson)
+library(ggplot2)
+library(tidyverse)
+library(maps)
+library(crosstalk)
+library(readr)
+library(gridExtra)
+library(leaflet)
+library(MASS)
+library(Rtsne)
+library(irlba)
+
+state_df &lt;- map_data(&quot;state&quot;)
+
+my_map_theme &lt;- theme_void()
+
+
+# load the data
+ling_data &lt;- read.table(&quot;https://raw.githubusercontent.com/malvikarajeev/linguisticSurvey/master/lingData.txt&quot;, header = T)
+ling_location &lt;- read.table(&quot;https://raw.githubusercontent.com/malvikarajeev/linguisticSurvey/master/lingLocation.txt&quot;, header = T)
+# question_data contains three objects: quest.mat, quest.use, all.ans
+
+
+library(repmis)
+source_data(&quot;https://github.com/malvikarajeev/linguisticSurvey/blob/master/question_data.RData?raw=true&quot;)</code></pre>
+<pre><code>## [1] &quot;quest.mat&quot; &quot;quest.use&quot; &quot;all.ans&quot;</code></pre>
+<pre class="r"><code>answers &lt;- all.ans[50:122]
+
+####USING PACKAGE ZIPCODE
+library(zipcode)
+data(&quot;zipcode&quot;)
+###changing ZIPs to add a zero
+zip &lt;- ling_data$ZIP
+zip &lt;- as.character(zip)
+for(i in 1:length(zip)) {
+  if(as.numeric(zip[i]) &lt; 10000){
+    zip[i] &lt;- paste0(&quot;0&quot;, zip[i])
+  }
+}
+
+ling_data$ZIP &lt;- zip
+t2 &lt;- merge(ling_data,zipcode, by.x = &#39;ZIP&#39;, by.y = &#39;zip&#39;)
+
+t2 &lt;- t2[, -c(2:4, 72, 73)]
+
+names(t2)[69:72] &lt;- c(&quot;CITY&quot;, &quot;STATE&quot;, &quot;lat&quot;, &quot;long&quot;)
+
+ling_data &lt;- t2
+
+l &lt;- length(all.ans)
+
+structure &lt;- matrix(numeric(l*2), l,2)
+for (i in 1:l){
+  
+  temp &lt;- all.ans[[i]]
+  structure[i,1] &lt;- temp$qnum[1]
+  structure[i,2] &lt;- length(temp$ans.let)
+}
+
+
+structure &lt;- as.data.frame(structure)
+names(structure) &lt;- c(&#39;ques.num&#39;, &#39;number_choices&#39;)
+
+#so one person has 73 responses.
+#for every response, structure$number_choices tells us which response it is. 
+
+##missing: 112, 113, 114, 116, 122
+
+
+struc &lt;- structure[50:122,]
+struc &lt;- struc[-c(63:65,67,73),]
+struc &lt;- struc[-59,]
+
+#source(&quot;/Users/malvikarajeev/Desktop/stat215/stat-215-a/lab2/R/clean.R&quot;)
+dummy &lt;- ling_data[,-c(1, 69:72)]
+
+names(dummy) &lt;- struc$ques.num
+answer_no &lt;- struc$number_choices
+N &lt;- nrow(ling_data)
+
+l &lt;- as.data.frame(matrix(numeric(N), N))
+
+for (i in 1:length(names(dummy))){
+  df &lt;- dummy[i]
+  names(df) &lt;- &quot;answers&quot;
+  df$recode &lt;- list(rep(0, answer_no[i]))
+  df$recode &lt;- Map(function(x,y) `[&lt;-`(x,y,1), x = df$recode, y = df$answers)
+  
+  temp &lt;- data.frame(matrix(unlist(df$recode), nrow=length(df$recode), byrow=T))
+  l &lt;- c(l, temp)
+}
+l &lt;- data.frame(l)
+
+l &lt;- l[,-1]
+
+
+
+#binary &lt;- read.csv(&quot;~/Desktop/stat215/stat-215-a/lab2/data/binary.csv&quot;)
+#binary &lt;- binary[,-1] ##serial numbers
+binary &lt;- l
+
+########################################################
+##fix the column  names using structure
+##creating a column on vector names
+
+create_names &lt;- function(x) {
+  return(lapply(x$number_choices, function(x) {seq(1:x)}))
+}
+
+names_col &lt;- create_names(struc)
+names_ans &lt;- unlist(sapply(1:67, function(x) {paste(struc$ques.num[[x]], names_col[[x]], sep = &quot;_&quot;)}))
+
+names(binary) &lt;- names_ans
+
+######################################################
+
+binary$lat &lt;- ling_data$lat
+binary$long &lt;- ling_data$long
+binary$id &lt;- ling_data$ID
+binary$city &lt;- ling_data$CITY
+binary$state &lt;- ling_data$STATE
+
+##keeping first three zips of dataframe
+
+binary$zip &lt;- substr(as.character(ling_data$ZIP),1,nchar(ling_data$ZIP) - 2)
+
+##clear out indivudals who didnt answer all the questions
+
+binary &lt;- binary[rowSums(binary[,1:468]) == 67,]
+
+###########################BY ZIP
+##group by . have to remove: state, zip, city, lat, long
+ 
+
+
+
+temp &lt;- binary[, -(469:472)]
+
+by_zip &lt;- temp %&gt;% group_by(zip) %&gt;% summarise_all(sum)
+
+##to add columns for lat,long, stat etc, we group ling_data by zip, 
+#and then report the MODE of each of the required columns
+#group by city, get the first state, most frequent occuring city, and most frequent occuring lat and log
+#to make it easier will moduralise it:##na.last =NA removes NAs
+
+ling_data$newZIP &lt;- substr(as.character(ling_data$ZIP), 1, nchar(ling_data$ZIP) - 2)
+
+get_mode &lt;- function(x) {
+  #return(names(sort(table(x, use.NA = &#39;always&#39;), decreasing = T, na.last = T)[1]))
+  #return(which.max(tabulate(x)))
+  ux &lt;- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+temp &lt;- ling_data %&gt;% group_by(newZIP) %&gt;% summarise(state = get_mode(STATE), city = get_mode(CITY),
+                                                     lat = get_mode(as.numeric(lat)), long = get_mode(as.numeric(long)))
+
+
+##by_zip_ll has all the added columns
+
+by_zip_ll &lt;- merge(by_zip, temp[,c(&quot;lat&quot;,&quot;long&quot;, &quot;newZIP&quot;,&quot;state&quot;,&quot;city&quot;)], 
+                   by.x = &#39;zip&#39;, by.y = &#39;newZIP&#39;, all.x = T)
+
+##adding state info using data(states)
+by_zip_ll$state &lt;- as.character(by_zip_ll$state)
+
+data(state)
+state_info &lt;- data.frame(stringsAsFactors = F, state.abb, 
+                         state.region)
+
+by_zip_ll &lt;- merge(by_zip_ll, state_info, by.x = &quot;state&quot;, by.y = &quot;state.abb&quot;) 
+
+##finally, remove hawaki and alaska
+
+by_zip_ll &lt;- by_zip_ll %&gt;% filter(!(state == &#39;AK&#39; | state == &#39;HI&#39;))
+
+just_zip &lt;- by_zip_ll
+##let&#39;s change frequenceies to relative frequencies for PCA and KMEANS, DBSCAN ETC.
+
+temp &lt;- by_zip_ll[,-c(1,2, 471:747)]
+
+
+
+temp &lt;- t(apply(temp, 1, function(i) i/sum(i))) ##transpose because R populates by column
+
+##sanity check
+#rowSums(temp)
+
+by_zip_ll[,-c(1,2, 471:747)] &lt;- temp</code></pre>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The study of aggregate linguistic properties over spatial variation is called dialectometry, a sub branch of dialectology: the study of dialects. As language variation is complex, both geographically and dynamically, computational techniques, that can deal with large amounts of granular data, and statistic tehcniques, that can help make inferences from this data, are pivotal for the advancement of dialectometry.</p>
+<p>In 2003, a dialect survey was condcted as part of an expansion of an initiative started by Professor Bert Vaux at Harvard University. The Dialect Survey uses a series of questions, including rhyming word pairs and vocabulary words, to explore words and sounds in the English language. The survey was conducted to obtain a contemporary view of American English dialectal variation. It started as an online survey, with a final tally of around 47,000 respondents. For this report, we’re interested in the lexical-variant questions, rather than phoenetical variation.</p>
+<p>By analysing the responses to these questions, we are interested in investigating some geographical structure that might be present in this data. In this report, we’ll explore some dimension reduction methods, and also use some clustering methods to cluster observations into geographically-meaningful groups, using k-means and hierarchical bipartite spectral clustering.</p>
+</div>
+<div id="dataset" class="section level1">
+<h1>Dataset</h1>
+<p>The survey dataset contains a set of 122 questions. Each question has around 47,000 responses. For our analyses and clustering, we group the data the first 3 digits of the respondents ZIP code. U.S. ZIP Code Areas (Three-Digit) represents the first three digits of a ZIP Code. The first digit of a five-digit ZIP Code divides the United States into 10 large groups of states numbered from 0 in the Northeast to 9 in the far West.</p>
+<p>Within these areas, each state is divided into an average of 10 smaller geographical areas, identified by the second and third digits. These digits, in conjunction with the first digit, represent a sectional center facility or a mail processing facility area.</p>
+<p>There are around ~800 such areas. Each question has a varying degree of possible responses, summarised in ‘answers’ data. Each row represents an individuals reponse, along with their city, state and ZIP, although this was user input so is extremely essy (specially the city). The main dataset, ‘ling_data’ contains this information. In the data cleaning section, I will explain how we sufficied through these challenges.</p>
+<div id="data-cleaning" class="section level2">
+<h2>Data Cleaning</h2>
+<ol style="list-style-type: decimal">
+<li><p>The first step was to fix the ling_data. I used the package ‘zipcode’, which has all the unique zipcodes of United States, along with the corresponding city and State. Before merging ling_data with this dataset, I had to add a leading ‘0’ before the 4 digit ZIPs. After merging on the zip code, I was able to remove all the messy entries of ‘cities’ and ‘states’.</p></li>
+<li><p>After that, I subsetted the data to our questions of interests, i.e the lexical questions. Then, I changed the ~47,000 x 67 categorical response matrix to a ~47,000 x 468 binary matrix. To illustrate: Question 65 has 6 options. If person A picked option 4, their corresponding entry would become (0,0,0,1,0,0). I also changed the column names to the answer options.</p></li>
+<li><p>Then, I removed all respondents who hadn’t answered all the questions, that is, their rows in the binary matrix did not sum to 67. This is to avoid skewing the data.</p></li>
+<li><p>Next, I grouped by the 3-digit zip column by adding all the responses and selecting the mode of city, state, latitude and longitude within that zipcode. I removed Alaska and Hawaii from the dataset to make graphical representation easier.</p></li>
+<li><p>Finally, I kept two dataframes for analyses, the one described above, and one in which I scale every observation within that zip by total observations in the zip. This is to normalise zips with too many or too few respondents.</p></li>
+</ol>
+</div>
+<div id="exploratory-data-analysis" class="section level2">
+<h2>Exploratory Data Analysis</h2>
+<p>I picked question 105 - What do you call a carbonated beverage? and question 65 - what do you call the insect that glows in the dark because they involve words that people use in common everyday dialect and it’s usually an either-or situation. (<em>CROSSTALK WIDGET</em>)</p>
+<p>To investigate further, I created an ID column for every unique combination of possible answers for both questions (without ‘other’), and then I removed the ID’s with a frequency fewer than 5,000.</p>
+<p><img src="/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/unique-1.png" width="480" style="display: block; margin: auto;" /></p>
+<p>There are 6 unique combinations occueing more than 3000 times. When we investigate those:</p>
+<p><img src="/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>While combination 19 and 20 seem to dominate the west coast, the rest seem fairly evenly spread over the other regions (combination 9 and 8 seems promiment). There are precisely:</p>
+<ol style="list-style-type: decimal">
+<li>Combination 19: Use ‘firefly’ and ‘soda’</li>
+<li>Combination 20: Use ‘firefly’ and ‘pop’</li>
+<li>Combination 9: Use ‘lightening bug’ and ‘pop’</li>
+<li>Combination 8: Use ‘lightening bug’ and pop’.</li>
+</ol>
+</div>
+</div>
+<div id="dimension-reduction-methods" class="section level1">
+<h1>Dimension reduction methods</h1>
+<p>As a first step towards dimesnsion reduction, I used Principal Component Analysis. For this, I centered the data. If not, the geometric interpretation of PCA shows that the first principal component will be close to the vector of means and all subsequent PCs will be orthogonal to it, which will prevent them from approximating any PCs that happen to be close to that first vector. I didn’t however, scale the data, instead decided to scale it by the size of the zipcode.</p>
+<div id="a-note" class="section level2">
+<h2>A note:</h2>
+<p>It is not a good idea to perform PCA or any other metric-based dimensino reduction on the original data. The challenge with categorical variables is to find a suitable way to represent distances between variable categories and individuals in the factorial space. While PCA can be still be done for binary data, for categorical data,</p>
+</div>
+<div id="results-of-pca" class="section level2">
+<h2>Results of PCA</h2>
+<p><img src="/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/PCA-1.png" width="1440" /></p>
+<p>When I colour the observations by region, theres seem to some clusters, but because the Screeplot is not explaining a lot of variation in the first 10 dimesnions, I decide to conduct a TNSE and metric Multi Dimensional Scaling.</p>
+<p>t-Distributed Stochastic Neighbor Embedding (t-SNE) is a non-linear technique for dimensionality reduction. t-Distributed stochastic neighbor embedding (t-SNE) minimizes the divergence between two distributions: a distribution that measures pairwise similarities of the input objects and a distribution that measures pairwise similarities of the corresponding low-dimensional points in the embedding. It is mainly a data exploration and visualization technique.</p>
+<p>Multi Dimensional Scaling (MDS) depends on a distance metric. For this dataset I chose pearson correlation, since I’m more interested in the ‘profile’ of an observation. Multidimensional scaling (MDS) is an established statistical technique that has sometimes been used in language study (see Wheeler (2005)).</p>
+<p>The results are as follows:</p>
+<p><img src="/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/tsne_mds-1.png" width="672" /></p>
+<p>In tSNE and MDS we see that there seems to significant clustering according to region of the observation. t-SNE seems to clear the more clear and well-demarcated clusters. In PCA, however, clustering seems weaker.</p>
+</div>
+</div>
+<div id="clustering" class="section level1">
+<h1>Clustering</h1>
+<div id="k--means" class="section level2">
+<h2>K- MEANS</h2>
+<p>My first approach was to use k-means to group the clusters. k-means is relatively computationally less expensive and is a good starting point to assess the validity of clusters. it’s useful when we have some sort of a plausible idea of how many clusters exist in the dataset.</p>
+<p>I tried three metrics - Silhouette, Within sum of squares, and gap statistic to arrive at an optimal <span class="math inline">\(k\)</span>. ‘WSS’ is usually ambiguous and unreliable.</p>
+<p><img src="/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/which_k-1.png" width="384" /><img src="/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/which_k-2.png" width="384" /><img src="/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/which_k-3.png" width="384" /></p>
+<p>Both the Silhouette Method and Gap Statistic suggest less than 4 clusters. However, when we run a k-means with <span class="math inline">\(k\)</span> = 2,3,4 and 5, we see that k = 4 seems to give the most uniform groups: (<em>CROSSTALK WIDGET</em>)</p>
+</div>
+<div id="hierarchical-bipartite-spectral-graph-partioning" class="section level2">
+<h2>Hierarchical Bipartite Spectral Graph Partioning</h2>
+<p>The <em>BiSGP</em> method is based on calculating the singular value decomposition of the input matrix. The hierarchical clustering is obtained by repeatedly clustering the input matrix into two groups. An extensive mathematical explanation as well as an example of the BiSGP method is provided by Wieling and Nerbonne (2010, 2011). Dhillon first introduced this in his 2003 paper: <a href="https://www.cs.utexas.edu/users/inderjit/public_papers/kdd_bipartite.pdf" class="uri">https://www.cs.utexas.edu/users/inderjit/public_papers/kdd_bipartite.pdf</a></p>
+<p><img src="/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/biHCP-1.png" width="384" style="display: block; margin: auto;" /></p>
+</div>
+<div id="importance-within-a-cluster" class="section level2">
+<h2>Importance Within A Cluster</h2>
+<p><strong>Wieling and Nerbonne (2011)</strong> proposed a method to measure the importance of a linguistic feature (in our case a specific answer option) in a cluster by combining two measures, <em>representativeness and distinctiveness</em>.</p>
+<p>Representativeness of a variant measures how frequently it occurs in the postcode areas in the cluster. For example, if a cluster consists of ten postcode areas and the variant occurs uniquely in six postcode areas, the representativeness is 0.6.</p>
+<p>Distinctiveness of a variant measures how frequently the variant occurs within as opposed to outside the cluster (while taking the relative size of the clusters into account). For example, a distinctiveness of 1 indicates that the variant is not used outside of the cluster.</p>
+<p><img src="/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/rep_dis-1.png" width="672" /></p>
+<ol style="list-style-type: decimal">
+<li><p>For example, we find that in Cluster 4, the two important questions variants are in <strong>Q58</strong>, same as Cluster 3. Taking a look at the questinos database tells us that this question is <em>Which of these terms do you prefer for a sale of unwanted items on your porch, in your yard, etc.?</em></p></li>
+<li><p>In cluster 2, one of the most important question is about correct use of <em>Pantyhose are so expensive anymore that I just try to get a good suntan and forget about it.</em></p></li>
+<li><p>Similarly in cluster 1 one of the most important questions is <em>What do you call a public railway system (normally underground)?</em> and *“Would you say ‘Are you coming with?’ as a full sentence, to mean ‘Are you coming with us?’*</p></li>
+</ol>
+<p>.</p>
+</div>
+</div>
+<div id="stability-of-findings-to-perturbation" class="section level1">
+<h1>Stability of findings to perturbation</h1>
+<p>Since k-means and BiSGP depend on random selection of center points, it influences the stability of conclusions. BiSGP method seemed pretty stable because it gave almost the same top 10 most relevant variants for each time I ran the code with different seeds.</p>
+<p><img src="/post/Linguistic-Survey-Data-can-we-detect-regionalities/LinguisticSurvey_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>We see that the ‘most important’ questions do seem to change we subsample. I find to be logical because of the clustering is being done on the rows and the columns in BiSGP.</p>
+<div id="k-means" class="section level3">
+<h3>k-means</h3>
+<p>For k-means,I subsampled from the data 100 times, and averaged the ‘center matrix’ and compared it the center matrix to the original data.</p>
+<p>The centers were off at an average of 3.6 units.</p>
+</div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>Reshaping data to make it suitable for analyses is very important. In a data structure like this, many important restructuring decisions, like whether to turn categorical to binary, to scale or not, which distance metric to use, all matter as much as the method of dimesion reduction/ clustering we attempt to do.</p>
+<p>Dialectrometry and linguistic data in general has great scope for complex analyses, and can be used not only to ascertain spatial trends but perhaps also population characteristics like gender, age, etc.</p>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<ol style="list-style-type: decimal">
+<li><p>Bipartite spectral graph partitioning for clustering dialect varieties and detecting their linguistic features - Martijn Weiling, John Nerbonne</p></li>
+<li><p>Co-clustering documents and words using Bipartite Spectral Graph Partitioning - Inderjit S. Dhillon</p></li>
+</ol>
+</div>
+
+    </div>
+
+    
+
+
+
+
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=/post/linguistic-survey-data-can-we-detect-regionalities/linguisticsurvey/&amp;text=Linguistic%20Data%20Analysis" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=/post/linguistic-survey-data-can-we-detect-regionalities/linguisticsurvey/&amp;t=Linguistic%20Data%20Analysis" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=Linguistic%20Data%20Analysis&amp;body=/post/linguistic-survey-data-can-we-detect-regionalities/linguisticsurvey/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=/post/linguistic-survey-data-can-we-detect-regionalities/linguisticsurvey/&amp;title=Linguistic%20Data%20Analysis" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://web.whatsapp.com/send?text=Linguistic%20Data%20Analysis%20/post/linguistic-survey-data-can-we-detect-regionalities/linguisticsurvey/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=/post/linguistic-survey-data-can-we-detect-regionalities/linguisticsurvey/&amp;title=Linguistic%20Data%20Analysis" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+      
+      <img class="avatar mr-3 avatar-circle" src="/authors/admin/avatar_hu21b1ecab893026c8ae52f4df535b0e49_2501376_270x270_fill_q90_lanczos_center.jpg" alt="Avatar">
+    
+
+    <div class="media-body">
+      <h5 class="card-title"><a href="/">Malvika Rajeev</a></h5>
+      
+      <p class="card-text">I&rsquo;m a statistician and I look for cool datasets to explore.</p>
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="/#contact" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://twitter.com/malvikarajeev" target="_blank" rel="noopener">
+        <i class="fab fa-twitter"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/malvikarajeev" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://linkedin/in/malvikarajeev" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+        
+      
+
+    
+
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js" integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin="anonymous"></script>
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    <script>const isSiteThemeDark = true;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.a8d7005002cb4a052fd6d721e83df9ba.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+  <p class="powered-by">
+    
+      <a href="/privacy/">Privacy Policy</a>
+    
+    
+       &middot; 
+      <a href="/terms/">Terms</a>
+    
+  </p>
+  
+
+  <p class="powered-by">
+    
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
