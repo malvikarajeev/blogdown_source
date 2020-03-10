@@ -32,4 +32,4 @@ social:
 superuser: true
 ---
 
-hello! 
+hello! I'm a statistician and I look for cool datasets to explore.

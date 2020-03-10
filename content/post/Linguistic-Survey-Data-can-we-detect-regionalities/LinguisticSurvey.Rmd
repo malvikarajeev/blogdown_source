@@ -276,9 +276,9 @@ There are around ~800 such areas. Each question has a varying degree of possible
 ## Exploratory Data Analysis
 
 I picked question 105 - What do you call a carbonated beverage? and question 65 - what do you call the insect that glows in the dark because they involve words that people use in common everyday dialect and it's usually an either-or situation.
-(*CROSSTALK WIDGET*)
 
-```{r eda, eval = F, echo = F, message = F, warning = F}
+
+```{r eda, eval = T, echo = F, message = F, warning = F}
 ##what do u call a carbonated beverage
 
 q105 <- by_zip_ll[, c("city","105_1","105_2","105_3","105_4",

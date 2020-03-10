@@ -44,7 +44,7 @@ local_business_type = ""
 org_name = ""
 
 # Description for social sharing and search engines. If undefined, superuser role is used in place.
-description = "what dat data do?"
+description = "Malvika Rajeev"
 
 ############################
 ## Site Features
@@ -107,9 +107,8 @@ address = {street = "2185 Dwight Way", city = "Berkeley", region = "CA", postcod
 contact_links = [
   {icon = "twitter", icon_pack = "fab", name = "DM Me", link = "https://twitter.com/Twitter"},
   {icon = "skype", icon_pack = "fab", name = "Skype Me", link = "skype:echo123?call"},
-  {icon = "linkedin", icon_pack = "fab", name = "linkedin", link = "https://wwww.linkedin.com/in/malvikarajeev"},
-  {icon = "keybase", icon_pack = "fab", name = "Chat on Keybase", link = "https://keybase.io/"},
-  {icon = "comments", icon_pack = "fas", name = "Discuss on Forum", link = "https://discourse.gohugo.io"},
+  {icon = "linkedin", icon_pack = "fab", name = "linkedin", link = "https://www.linkedin.com/in/malvikarajeev"},
+  {icon = "instagram", icon_pack = "fab", name = "Instagram", link = "https://www.instagram.com/malv.ika.r/"}
   # {icon = "telegram", icon_pack = "fab", name = "Telegram Me", link = "https://telegram.me/@Telegram"},
   ]
 
