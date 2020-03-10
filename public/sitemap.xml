@@ -26,7 +26,7 @@
   </url>
   
   <url>
-    <loc>/reviews/</loc>
+    <loc>/reviews/freedmancritique/freedmancritique/</loc>
   </url>
   
   <url>
@@ -42,6 +42,10 @@
   </url>
   
   <url>
+    <loc>/reviews/iv/iv/</loc>
+  </url>
+  
+  <url>
     <loc>/post/linguistic-survey-data-can-we-detect-regionalities/linguisticsurvey/</loc>
   </url>
   
@@ -54,11 +58,23 @@
   </url>
   
   <url>
+    <loc>/reviews/</loc>
+  </url>
+  
+  <url>
+    <loc>/reviews/simpsonparadox/simpsonparadox/</loc>
+  </url>
+  
+  <url>
     <loc>/post/spotifyanalysis/spotifyanalysis/</loc>
   </url>
   
   <url>
     <loc>/tags/</loc>
+  </url>
+  
+  <url>
+    <loc>/reviews/propensityscores/propensityscores/</loc>
   </url>
   
   <url>

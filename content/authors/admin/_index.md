@@ -12,9 +12,11 @@ education:
     year: 2017
 email: "malvikarajeev@berkeley.edu"
 interests:
-- Data Visualisation
-- Causal Inference
 - Statistical Inference
+- Causality
+- Data Visualisation
+- Machine Learning
+
 name: Malvika Rajeev
 social:
 - icon: envelope

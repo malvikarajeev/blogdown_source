@@ -1,5 +1,5 @@
 ---
-title: "'The central role of the propensity score in observational studies for causal effects: summary'
+title: "The central role of the propensity score in observational studies for causal effects: summary"
 output: html_document
 ---
 
@@ -7,10 +7,10 @@ Observational studies create barriers for causal studies because of several reas
   
   
 The paper defines a balancing score as any function of the covariates (which are observed pretreatment or simply: covariates), such that the conditional distribution of x given this score is the same for treated and control units. X (the covariates) itself is balancing, but the objective is to find a many-one balancing score or coarsest to bring about dimension reduction.  
-Now, the propensity score $e(x) = Pr(Z = 1/ X = x))$ for non randomised studies does not have a specific form, as opposed to in randomised studies where this probability is known. However, it’s possible to estimate the score from the data (Using for example a generalised linear model like logit). Moreover, propensity score is a balancing score - in fact, it is the ‘finest’ balancing score - it can be represented as a function of any other balancing score. 
+Now, the propensity score $e(x) = Pr(Z = 1/ X = x))$ for non randomised studies does not have a specific form, as opposed to in randomised studies where this probability is known. However, it's possible to estimate the score from the data (Using for example a generalised linear model like logit). Moreover, propensity score is a balancing score - in fact, it is the ‘finest' balancing score - it can be represented as a function of any other balancing score. 
   
   
-If the treatment assignment is ‘strongly ignorable’ - that is, conditional on X (covariates), potential outcomes are independent of assignment, then it is true that conditional on the propensity score, potential outcomes are independent of assignment. 
+If the treatment assignment is ‘strongly ignorable' - that is, conditional on X (covariates), potential outcomes are independent of assignment, then it is true that conditional on the propensity score, potential outcomes are independent of assignment. 
   
   
 Conditioning on propensity score gives us an unbiased estimate. Units with the same value of propensity score but different treatments can act as controls for each other; the expected difference in their response equals the average treatment effect.
@@ -19,7 +19,7 @@ The applications of propensity score extends to pair matching, stratification (d
   
 The paper discussed three main applications of propensity scores: 
 Pair matching: This means having pairs of treated and control units in our data. First, randomly sample a propensity score, and then get a treatment and control unit with the matching propensity score value. Paired matching given propensity score has lower variance: we saw the exact formulas in lecture.
-Covariance adjustment: With X as the propensity score, within each strata of propensity score we can do a linear regression: this is the same as OLS with interaction, or Lin’s estimator.
+Covariance adjustment: With X as the propensity score, within each strata of propensity score we can do a linear regression: this is the same as OLS with interaction, or Lin's estimator.
   
     
     
@@ -29,12 +29,12 @@ Stratification:  Conditional on propensity score, we can estimate ATE like we wo
     
 The rationale for the use of propensity score in observational studies were several, including:
 Conditioning on the propensity score makes pair matching for intuitive, and makes the study easier to understand for people with limited statistical background
-Model-based adjustment become more robust even if ‘true’ model of regressing outcomes on propensity score is incorrect.
+Model-based adjustment become more robust even if ‘true' model of regressing outcomes on propensity score is incorrect.
   
 If you have large control group reservoir: say if you are interested in the health of workers working in a Nuclear plant, then it easier to stratify on propensity score, and then sample from the control group, then to do random subgrouping.
 Of course it is possible to have residual bias in the propensity score: but this itself implies that the estimate for ATE is also biased. 
 
   
   
-*To summarise:* propensity score can be understood as how much ‘importance’ the treatment mechanism is giving to treatment outcome: it signifies the probability that we will observe Y(1), not Y(0). Fitting a model on E(Z/X) can give us unbiased estimates of propensity, and under strong ignorability, there are various ways to estimate the average causal effect in an otherwise non randomised observational study, through pair matching, stratification and covariance adjustment. 
+*To summarise:* propensity score can be understood as how much ‘importance' the treatment mechanism is giving to treatment outcome: it signifies the probability that we will observe Y(1), not Y(0). Fitting a model on E(Z/X) can give us unbiased estimates of propensity, and under strong ignorability, there are various ways to estimate the average causal effect in an otherwise non randomised observational study, through pair matching, stratification and covariance adjustment. 
   

@@ -1,36 +1,36 @@
 +++
-  # A Recent Blog Posts section created with the Pages widget.
-  # This section displays recent blog posts from `content/post/`.
+# A Recent Blog Posts section created with the Pages widget.
+# This section displays recent blog posts from `content/reviews/`.
   
-  widget = "pages"  # See https://sourcethemes.com/academic/docs/page-builder/
-  headless = true  # This file represents a page section.
-  active = true  # Activate this widget? true/false
-  weight = 60  # Order that this section will appear.
+widget = "pages"  # See https://sourcethemes.com/academic/docs/page-builder/
+headless = true  # This file represents a page section.
+active = true  # Activate this widget? true/false
+weight = 50  # Order that this section will appear.
   
-  title = "Recent Summaries"
-  subtitle = ""
+title = "Recent Summaries"
+subtitle = "Reviews of Academic Papers."
   
-  [content]
+[content]
   # Page type to display. E.g. post, talk, or publication.
-  page_type = "post"
+  page_type = "reviews"
   
   # Choose how much pages you would like to display (0 = all pages)
   count = 5
   
   # Choose how many pages you would like to offset by
   offset = 0
-  
+
   # Page order. Descending (desc) or ascending (asc) date.
-  order = "asc"
-  
+  order = "desc"
+
   # Filter posts by a taxonomy term.
   [content.filters]
-  tag = ""
-  category = ""
-  publication_type = ""
-  exclude_featured = false
+    tag = ""
+    category = ""
+    publication_type = ""
+    exclude_featured = false
   
-  [design]
+[design]
   # Toggle between the various page layout types.
   #   1 = List
   #   2 = Compact
@@ -38,14 +38,14 @@
   #   4 = Citation (publication only)
   view = 2
   
-  [design.background]
+[design.background]
   # Apply a background color, gradient, or image.
   #   Uncomment (by removing `#`) an option to apply it.
   #   Choose a light or dark text color by setting `text_color_light`.
   #   Any HTML color name or Hex value is valid.
   
   # Background color.
-  color = "purple"
+  # color = "grey"
   
   # Background gradient.
   # gradient_start = "DeepSkyBlue"
@@ -54,14 +54,14 @@
   # Background image.
   # image = "background.jpg"  # Name of image in `static/img/`.
   # image_darken = 0.6  # Darken the image? Range 0-1 where 0 is transparent and 1 is opaque.
-  
+
   # Text color (true=light or false=dark).
-  # text_color_light = true  
+   text_color_light = false  
   
-  [advanced]
-  # Custom CSS. 
-  css_style = ""
-  
-  # CSS class.
-  css_class = ""
-  +++
+[advanced]
+ # Custom CSS. 
+ css_style = ""
+ 
+ # CSS class.
+ css_class = ""
++++

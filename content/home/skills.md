@@ -31,6 +31,12 @@ subtitle = ""
   icon_pack = "fab"
   name = "Python"
   description = "100%"
+  
+[[feature]]
+  icon = "angry"
+  icon_pack = "far"
+  name = "Appreciating memes"
+  description = "200%"
 
 [[feature]]
   icon = "camera-retro"
