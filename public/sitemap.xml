@@ -26,11 +26,19 @@
   </url>
   
   <url>
+    <loc>/reviews/</loc>
+  </url>
+  
+  <url>
     <loc>/authors/</loc>
   </url>
   
   <url>
     <loc>/categories/</loc>
+  </url>
+  
+  <url>
+    <loc>/reviews/iv/iv-analysis/</loc>
   </url>
   
   <url>
