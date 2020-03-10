@@ -1,0 +1,16 @@
+base
+jsonlite
+ggplot2
+tidyverse
+tibble
+tidyr
+readr
+purrr
+dplyr
+stringr
+forcats
+crosstalk
+leaflet
+plotly
+ggthemes
+lubridate
