@@ -34,4 +34,4 @@ social:
 superuser: true
 ---
 
-hello! I'm a statistician and I look for cool datasets to explore.
+I'm a statistician and I look for cool datasets to explore.
