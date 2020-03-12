@@ -30,7 +30,7 @@ social:
   link: https://github.com/malvikarajeev
 - icon: linkedin
   icon_pack: fab
-  link: https://linkedin/in/malvikarajeev
+  link: https://www.linkedin.com/in/malvikarajeev
 superuser: true
 ---
 
