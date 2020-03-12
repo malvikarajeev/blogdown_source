@@ -37,6 +37,13 @@ subtitle = ""
   icon_pack = "far"
   name = "Appreciating memes"
   description = "200%"
+  
+[[feature]]
+  icon = "terminal"
+  icon_pack = "fas"
+  name = "Bash"
+  description = "80%"  
+
 
 [[feature]]
   icon = "camera-retro"
