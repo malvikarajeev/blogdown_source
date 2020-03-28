@@ -35,3 +35,4 @@ superuser: true
 ---
 
 I'm a statistician and I look for cool datasets to explore.
+"All models are wrong. Some are useful" -- George Box
