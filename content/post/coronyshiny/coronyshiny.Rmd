@@ -1,6 +1,7 @@
 ---
 title: "Visualising Covid Trends through R Shiny"
 author: "Malvika Rajeev"
+date: "16 April 2020"
 output: html_document
 ---
 
@@ -23,21 +24,21 @@ library(purrr)
 library(ggpubr)
 ```
 
-##Covid-19 
+###Covid-19 
 
-If I had a nickel for every time I've had to say "these are unprecendeted circumstances", I would have quite a few. Shelter at home has people going crazy, myself included. 
+If I had a nickel for every time I've had to say "these are unprecendeted circumstances" in the past few weeks, I would have quite a few. Shelter at home has people going crazy, myself included. 
   
   
 Anyway, I decided to create a shiny app to visualise corona spreading trends. These visualisations can be super useful in understanding how to model pandemics. I've left the code here. I used the shiny website to deploy the app.
 
-##Data Source
+###Data Source
 
 While a lot of news out;ets and government sources have their own configuration of corona data, I decided to use the open-srouce data provided by https://ourworldindata.org/coronavirus . The interactive graphs they have are wayy more cooler than mine. But hey, you gotta start somewhere.
 
 <iframe height="800" width="100%" frameborder="no" src="https://malvika.shinyapps.io/coronyshiny/"> </iframe>
 
 
-##Code
+###Code
 
 ```{r read-in, echo = F, eval = F}
 covid_cases = read.csv(url("https://covid.ourworldindata.org/data/ecdc/total_cases.csv"))
