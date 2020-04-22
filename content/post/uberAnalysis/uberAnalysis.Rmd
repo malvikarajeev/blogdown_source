@@ -26,7 +26,7 @@ library(purrr)
 
 The purpose of this exercise is to visualise how I use my uber data. Uber records are pretty useful - just ask uber to email you your data: https://help.uber.com/driving-and-delivering/article/request-your-personal-uber-data?nodeId=fbf08e68-65ba-456b-9bc6-1369eb9d2c44
 
-I'm removing remore 2020 and 2015 (it contains only one day) for now becuase it might skew the data.
+I'm removing remote 2020 and 2015 (it contains only one day) for now because it might skew the data.
 
 ##reading in the data
 
@@ -63,7 +63,7 @@ ggplot(myrides, aes(x = month_year)) +
   scale_fill_discrete(name = "Year")
 ```
 
-Seems like on an avergae I took about 10-20 rides a month, seemingly growing with every year. there seems to be a coherent pattern in that number of rides increase monotically as we move from January to February (except for in 2018). The month of September-November seems generally low. 
+Seems like on an average I took about 10-20 rides a month, seemingly growing with every year. there seems to be a coherent pattern in that number of rides increase monotonically as we move from January to February (except for in 2018). The month of September-November seems generally low. 
 
 
 Now, I moved from New Delhi, India, to Berkeley, California, in the month of August, 2018. Can we see this move reflect different patterns?
@@ -83,7 +83,7 @@ ggplot(myrides, aes(y = duration_mins, x = month_year)) + geom_boxplot() +
   
 ```
 
-The average time of my rides is decreasing: perhaps it makes sense, the traffic in New Delhi is insane comapred to the traffic in Berkeley.
+The average time of my rides is decreasing: perhaps it makes sense, the traffic in New Delhi is insane compared to the traffic in Berkeley.
 
 ##fare habits
 
