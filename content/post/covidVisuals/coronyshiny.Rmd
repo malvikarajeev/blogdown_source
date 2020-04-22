@@ -1,0 +1,127 @@
+---
+title: "Visualising Covid Trends through R Shiny"
+author: "Malvika Rajeev"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+library(shiny)
+library(maps)
+library(ggplot2)
+library(lubridate)
+library(ggthemes)
+library(RColorBrewer)
+library(tidyverse)
+library(ggrepel)
+library(gganimate)
+library(ggraph)
+library(gapminder)
+library(ggmap)
+library(igraph)
+library(purrr)
+library(ggpubr)
+```
+
+##Covid-19 
+
+If I had a nickel for every time I've had to say "these are unprecendeted circumstances", I would have quite a few. Shelter at home has people going crazy, myself included. 
+  
+  
+Anyway, I decided to create a shiny app to visualise corona spreading trends. These visualisations can be super useful in understanding how to model pandemics. I've left the code here. I used the shiny website to deploy the app.
+
+##Data Source
+
+While a lot of news out;ets and government sources have their own configuration of corona data, I decided to use the open-srouce data provided by https://ourworldindata.org/coronavirus . The interactive graphs they have are wayy more cooler than mine. But hey, you gotta start somewhere.
+
+<iframe height="800" width="100%" frameborder="no" src="https://malvika.shinyapps.io/coronyshiny/"> </iframe>
+
+
+##Code
+
+```{r read-in, echo = F, eval = F}
+covid_cases = read.csv(url("https://covid.ourworldindata.org/data/ecdc/total_cases.csv"))
+
+covid_deaths = read.csv(url("https://covid.ourworldindata.org/data/ecdc/total_deaths.csv"))
+covid_cases$date = covid_cases$date %>% as.Date(format = "%Y-%m-%d")
+covid_deaths$date = covid_deaths$date %>% as.Date(format = "%Y-%m-%d")
+
+full = read.csv(url("https://covid.ourworldindata.org/data/ecdc/full_data.csv"))
+
+full$date = full$date %>% as.Date(format = "%Y-%m-%d")
+##add month
+full$month = full$date %>% month(label = T)
+
+
+##add year
+full$year = full$date %>% year
+
+
+```
+
+
+
+```{r coronashiny, cache = F, eval = F}
+library(shiny)
+library(ggthemes)
+
+uii <- fluidPage(
+  titlePanel("Spread of COVID-19"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      #helpText(""),
+    
+      radioButtons("cases", label = h4("Select type of data"),
+            choices = list("Cumulative Cases" = "total_cases",
+                           "New Cases (per day)" = "new_cases")),
+         
+    radioButtons("deaths", label = h4("Select type of data"),
+            choices = list("Cumulative Deaths" = "total_deaths",
+                           "New Deaths (per day)" = "new_deaths")),
+      
+      dateRangeInput("dates", 
+        label = h4("Date range"),
+        start = "2019-12-31", 
+        end = as.Date(Sys.Date())),
+    
+    selectInput("country", h4("Country"), choices = full$location %>% unique %>% as.character(), selected = "United States", multiple            = FALSE, selectize = T)
+    ),
+    
+    mainPanel(plotOutput(outputId = "plot1"), plotOutput(outputId = "plot2"), plotOutput(outputId = "plot3"))
+    
+  )
+)
+
+
+#load()
+
+serverr <- function(input, output) {
+  
+  outputR = reactive({
+    
+    req(input$cases)
+    req(input$deaths)
+    req(input$dates)
+    req(input$country)
+    
+    temp = full %>% filter(date >=  input$dates[1] & date <= input$dates[2]) %>% filter(location == input$country)
+    
+    temp
+  }
+  )
+  
+  
+  
+  output$plot1 = renderPlot({ggplot(outputR(), aes(x = as.Date(date), col = month)) + geom_line(aes_string(y = input$cases), size = 1.5) +
+              labs(y = "Number of Cases",x = " ", title = "Confirmed Cases") + theme_linedraw() + theme(legend.title = element_blank()) + scale_color_brewer(palette="Dark2") })
+  
+  output$plot2 = renderPlot({ggplot(outputR(), aes(x = as.Date(date), col = month)) + geom_line(aes_string(y = input$deaths), size = 1.5) +
+              labs(y = "Number of Deaths",x = " ", title = "Confirmed Deaths") + theme_linedraw() + theme(legend.title =    element_blank()) + scale_color_brewer(palette="Dark2")})
+  
+  output$plot3 = renderPlot({ggplot(outputR(), aes(x = as.Date(date), col = month)) + geom_line(aes(y = total_deaths * 100/total_cases), size = 1.5) +
+              labs(y = "%",x = " ", title = "Deaths as Percent of Cases") + theme_linedraw() + theme(legend.title =    element_blank()) + scale_color_brewer(palette="Dark2") })
+}
+
+shinyApp(ui = uii, server = serverr)
+```
