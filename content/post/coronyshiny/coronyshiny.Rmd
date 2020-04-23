@@ -1,6 +1,5 @@
 ---
 title: "Visualising Covid-19 Trends through R Shiny"
-author: "Malvika Rajeev"
 output: html_document
 runtime: shiny
 ---
