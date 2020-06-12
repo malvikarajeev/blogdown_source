@@ -7,7 +7,7 @@ headless = true  # This file represents a page section.
 active = true  # Activate this widget? true/false
 weight = 50  # Order that this section will appear.
   
-title = "Recent Summaries"
+title = "Summaries"
 subtitle = "Reviews of Academic Papers."
   
 [content]
@@ -15,7 +15,7 @@ subtitle = "Reviews of Academic Papers."
   page_type = "reviews"
   
   # Choose how much pages you would like to display (0 = all pages)
-  count = 5
+  count = 0
   
   # Choose how many pages you would like to offset by
   offset = 0
