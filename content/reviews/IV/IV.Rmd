@@ -1,5 +1,6 @@
 ---
 title: 'Instrumental Variables: An Econometrician’s Perspective'
+author: 'Malvika Rajeev'
 output: html_document
 ---
 
