@@ -1,10 +1,3 @@
----
-title: "Rainfall in New Delhi, India: 1901 - 2015"
-author: "Malvika Rajeev"
-
-output: pdf_document
----
-
 
 
 <p><em>This analysis was understaken as a part of Cal’s Analysis of Time Series class.</em></p>
@@ -43,9 +36,9 @@ head(delhiTs)</code></pre>
 rainbymonth &lt;- ts(rain_seasonal, start = c(1901), frequency = 12)
 
 plot.ts(rain, main = &quot;Rainfall by Year&quot;)</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <pre class="r"><code>plot.ts(rainbymonth, main = &quot;Rainfall by Month over the Years&quot;)</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
 <p>When we view the aggregate annual data, there does seem to be some random fluctuations over time, but they seem consistent. When we view the monthly data over the years, there is clearly a seasonal component. Therefore it becomes a time series with <strong>frequency of 12.</strong></p>
 </div>
 <div id="comparing-monthly-mean-rainfall" class="section level3">
@@ -60,13 +53,13 @@ ggplot() +
   geom_hline(yintercept = annualmean, linetype=&quot;dashed&quot;) +
   labs(title = &quot;Mean Monthly Rainfall&quot;, x = &quot;Month&quot;, y = &quot;Rainfall&quot;) +
   theme_classic()</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>It is very clear that the months of July and June have a very high amount of rainfall, and so excluding theese two months, the rest of the months seem to have low variance around their mean. Monthly analysis of rainfall indicates that the region has very little or no change in non-monsoon months of January, February, March, November and December.</p>
 <pre class="r"><code>#Periodogram
 spectrum(rainbymonth, log = &quot;no&quot;)</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <pre class="r"><code>spectrum(rainDelhi$ANNUAL)</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
 <p>Generally speaking, if a time series appears to be smooth, then the values of the periodogram for low frequencies will be large relative to its other values and we will say that the data set has an excess of low frequency.</p>
 <ol style="list-style-type: decimal">
 <li>If a time series has a strong sinusoidal signal for some frequency, then there will be a peak in the periodogram at that frequency.</li>
@@ -95,7 +88,7 @@ decomp_2 &lt;- ggplot(rain_month, aes(x = time_period, y = rain)) +
   labs(title=&quot;Different LOESS parameters&quot;) +
   theme_classic()
 decomp_2</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p>It is clear that LOESS smoothening is giving us a biased curve for all values of the parameter.</p>
 </div>
 <div id="is-the-series-stationary" class="section level3">
@@ -108,7 +101,7 @@ rain_yearly &lt;- ggplot(rainDelhi) +
                     geom_abline(intercept = 646, slope = -0.059) +
                     theme_classic()
 rain_yearly</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <p>VARIANCE around mean is 20215.02. The slope of the annual time series is -0.5 mm / 10 years, giving about a decrease of aprx 6.8 in the time period from 1901 to 2015.</p>
 <p>I used Kwiatkowski-Phillips-Schmidt-Shin (KPSS) to determine stationarity, and the Mann-Kendall test for monotonic trend detection.</p>
 <pre class="r"><code>library(trend)
@@ -127,10 +120,10 @@ adf.test(rainbymonth)</code></pre>
 <pre class="r"><code>#stationarise
 rainComponents &lt;- decompose(rainbymonth)
 plot(rainComponents)</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <pre class="r"><code>rain_stat &lt;- rainbymonth - rainComponents$seasonal
 plot(rain_stat, main = &quot;monthy rain without seasonal component&quot;)</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
 <pre class="r"><code>##kendal test for trend result, for annual rainfall and monthly. 
 library(trend)
 
@@ -162,11 +155,11 @@ Box.test(rain_stat, lag = 12, type = &quot;Ljung-Box&quot;)</code></pre>
 <h3>Seasonal Differencing</h3>
 <p>The seasonal difference of a time series is the series of changes from one season to the next. For monthly data, in which there are 12 periods in a season, the seasonal difference of Y at period t is <span class="math inline">\(Y_t - Y_{t-12}\)</span>.</p>
 <pre class="r"><code>boxplot(rainbymonth~cycle(rainbymonth))</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 <pre class="r"><code>acf(rainbymonth)</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-9-2.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-9-2.png" width="672" /></p>
 <pre class="r"><code>pacf(rainbymonth)</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-9-3.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-9-3.png" width="672" /></p>
 <p>Seasonal effect becomes apparent. Even though the mean value of each month apart from the june and july is quite different their variance is small. Hence, we have strong seasonal effect with a cycle of 12 months or less. The time series data should be seasonally differenced, (due to a few spikes in both the ACF and PACF that cut the 95% confidence limits), by order D=1, in order to eliminate seasonality.</p>
 <pre class="r"><code>rain_ts &lt;- rainbymonth
 
@@ -178,9 +171,9 @@ rain_diff &lt;- diff(rainbymonth,36, difference = 1)
 rain_stat_diff &lt;- diff(rain_stat, 36, difference =1)
 
 Acf(rain_diff, lag.max = 50, main = &quot;ACF after seasonal differencing&quot;)</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 <pre class="r"><code>Pacf(rain_diff, lag.max = 50, main = &quot;PACF after seasonal differencing&quot;)</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-10-2.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-10-2.png" width="672" /></p>
 <p>On inspection, it seems like a SARIMA model with seasonal parameters:</p>
 <ol style="list-style-type: decimal">
 <li>AR = 1 or 0</li>
@@ -254,7 +247,7 @@ model_1 &lt;- sarima(rainbymonth, 1,0,1,1,1,1,12)</code></pre>
 ## iter  27 value 3.730422
 ## final  value 3.730422 
 ## converged</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 <pre class="r"><code>model_2 &lt;- sarima(rainbymonth, 0,0,0,2,1,0,12)</code></pre>
 <pre><code>## initial  value 4.070425 
 ## iter   2 value 3.927099
@@ -273,7 +266,7 @@ model_1 &lt;- sarima(rainbymonth, 1,0,1,1,1,1,12)</code></pre>
 ## iter   3 value 3.866612
 ## final  value 3.866612 
 ## converged</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-11-2.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-11-2.png" width="672" /></p>
 <pre class="r"><code>model_1</code></pre>
 <pre><code>## $fit
 ## 
@@ -384,9 +377,9 @@ model_1 &lt;- sarima(rainbymonth, 1,0,1,1,1,1,12)</code></pre>
 ## AIC=13071.89   AICc=13071.91   BIC=13087.25</code></pre>
 <pre class="r"><code>##predicting
 prediction_1 &lt;- sarima.for(rainbymonth, 132,1,0,1,1,1,1,12)</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-11-3.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-11-3.png" width="672" /></p>
 <pre class="r"><code>prediction_2 &lt;- sarima.for(rainbymonth, 132,0,0,0,2,1,0,12)</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-11-4.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-11-4.png" width="672" /></p>
 <pre class="r"><code>library(forecast)
 #fit &lt;- auto.arima(rainbymonth,max.p = 5,max.q = 5,max.P = 5,max.Q = 5,max.d = 3,seasonal = TRUE,ic = &#39;aicc&#39;)
 #plot(forecast(fit,h=20))
@@ -420,7 +413,7 @@ ggplot() +
     geom_ribbon(data=predict_1,aes(x = time,ymin=lower,ymax=upper),alpha=0.3) +
     labs(title=&quot;Prediction v Truth with 95% confidence bands&quot;) +
     theme_classic()</code></pre>
-<p><img src="/post/Rainfall-Analysis/timeseriesproject_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><img src="timeseriesproject_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 <p>The predictions seem not too far from the truth, and within the confidence intervals. The AIC’s for the SARIMA models are almost identical.</p>
 </div>
 <div id="conclusion" class="section level3">
