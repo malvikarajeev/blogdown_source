@@ -1,8 +1,8 @@
 ---
 # Documentation: https://sourcethemes.com/academic/docs/managing-content/
 
-title: "Lifeexp"
-subtitle: ""
+title: "Visualizing Inequalities in Life Expectancy"
+subtitle: "Tidyverse <3 "
 summary: ""
 authors: []
 tags: []
