@@ -8,7 +8,7 @@ active = true  # Activate this widget? true/false
 weight = 50  # Order that this section will appear.
   
 title = "Summaries"
-subtitle = "Reviews of Academic Papers."
+subtitle = "Reviews of Academic Papers"
   
 [content]
   # Page type to display. E.g. post, talk, or publication.
