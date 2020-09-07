@@ -1,6 +1,5 @@
 ---
-title: 'Agnostic Notes on Regression Adjustments to Experimental data: Reexamining
-  Freedman’s Critique'
+title: 'Agnostic Notes on Regression Adjustments to Experimental data: Reexamining Freedman’s Critique'
 author: "Malvika Rajeev"
 output: html_document
 ---
