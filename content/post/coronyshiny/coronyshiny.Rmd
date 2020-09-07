@@ -1,6 +1,6 @@
 ---
 title: "Visualising Covid-19 Trends through R Shiny"
-output: pdf_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
