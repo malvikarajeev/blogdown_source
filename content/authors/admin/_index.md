@@ -34,5 +34,5 @@ social:
 superuser: true
 ---
 
-I'm a statistician and I look for cool datasets to explore.
+Check out my covid-19 dashboard: https://malvika.shinyapps.io/corona_dashboard/
 "All models are wrong. Some are useful" -- George Box
