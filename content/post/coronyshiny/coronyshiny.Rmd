@@ -1,5 +1,6 @@
 ---
 title: "Visualising Covid-19 Trends through R Shiny"
+date: "`r Sys.Date()`"
 output: html_document
 ---
 
