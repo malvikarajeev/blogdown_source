@@ -35,6 +35,4 @@ superuser: true
 ---
 
 Check out my covid-19 dashboard: https://malvika.shinyapps.io/corona_dashboard/
-<br>
-
 "All models are wrong. Some are useful" -- George Box
