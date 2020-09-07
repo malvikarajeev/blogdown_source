@@ -1,10 +1,7 @@
 ---
-# Display name
-name: Malvika Rajeev
 authors:
 - admin
-# Is this the primary user of the site?
-superuser: true
+
 education:
   courses:
   - course: Master's in Statistics
@@ -13,7 +10,9 @@ education:
   - course: Bachelor's in Mathematics
     institution: St Stephen's College
     year: 2017
+    
 email: "malvikarajeev@berkeley.edu"
+
 interests:
 - Statistical Inference
 - Causality
@@ -21,6 +20,7 @@ interests:
 - Machine Learning
 
 name: Malvika Rajeev
+
 social:
 - icon: envelope
   icon_pack: fas
@@ -37,6 +37,3 @@ social:
 superuser: true
 ---
 Check out my covid-19 dashboard: https://malvika.shinyapps.io/corona_dashboard/
-
-
-"All models are wrong. Some are useful" -- George Box
