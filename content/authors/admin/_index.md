@@ -1,7 +1,10 @@
 ---
+# Display name
+name: Malvika Rajeev
 authors:
 - admin
-bio: Malvika Rajeev
+# Is this the primary user of the site?
+superuser: true
 education:
   courses:
   - course: Master's in Statistics
