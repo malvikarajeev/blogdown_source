@@ -3,17 +3,57 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/post/</loc>
+    <lastmod>2020-09-07T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/coronyshiny/coronyshiny/</loc>
+    <lastmod>2020-09-07T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/creditcard/</loc>
+    <lastmod>2020-06-22T18:19:12-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/lda/</loc>
+    <lastmod>2020-06-15T17:25:43-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/lifeexp/</loc>
+    <lastmod>2020-06-12T19:07:34-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/lefties/</loc>
+    <lastmod>2020-06-12T18:03:06-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/genres/</loc>
+    <lastmod>2020-06-12T14:41:16-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/pleasework/</loc>
+    <lastmod>2020-06-11T21:08:08-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/</loc>
+    <lastmod>2018-06-28T00:00:00+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/privacy/</loc>
     <lastmod>2018-06-28T00:00:00+01:00</lastmod>
   </url>
   
   <url>
     <loc>/terms/</loc>
-    <lastmod>2018-06-28T00:00:00+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/</loc>
     <lastmod>2018-06-28T00:00:00+01:00</lastmod>
   </url>
   
@@ -38,7 +78,7 @@
   </url>
   
   <url>
-    <loc>/reviews/iv/iv-analysis/</loc>
+    <loc>/post/uberanalysis/uberanalysis/</loc>
   </url>
   
   <url>
@@ -47,10 +87,6 @@
   
   <url>
     <loc>/post/linguistic-survey-data-can-we-detect-regionalities/linguisticsurvey/</loc>
-  </url>
-  
-  <url>
-    <loc>/post/</loc>
   </url>
   
   <url>
@@ -75,10 +111,6 @@
   
   <url>
     <loc>/reviews/propensityscores/propensityscores/</loc>
-  </url>
-  
-  <url>
-    <loc>/post/uberanalysis/uberanalysis/</loc>
   </url>
   
 </urlset>

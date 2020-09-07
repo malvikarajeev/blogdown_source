@@ -1,4 +1,7 @@
 ---
+name: Malvika Rajeev
+
+
 authors:
 - admin
 
@@ -11,7 +14,7 @@ education:
     institution: St Stephen's College
     year: 2017
     
-email: "malvikarajeev@berkeley.edu"
+email: ""
 
 interests:
 - Statistical Inference
@@ -36,4 +39,4 @@ social:
   link: https://www.linkedin.com/in/malvikarajeev
 superuser: true
 ---
-Check out my covid-19 dashboard: https://malvika.shinyapps.io/corona_dashboard/
+Check out my Covid-19 dashboard: https://malvika.shinyapps.io/corona_dashboard/

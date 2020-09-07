@@ -1,3 +1,10 @@
+---
+title: "Get your uber data"
+author: "Malvika Rajeev"
+date: "2/22/2020"
+output: html_document
+---
+
 
 
 <div id="requesting-data-from-uber" class="section level2">
@@ -74,7 +81,7 @@ myrides$month_year = format(as.Date(myrides$Begin.Trip.Time), &quot;%Y-%m&quot;)
   scale_fill_discrete(name = &quot;Year&quot;)</code></pre>
 <pre><code>## Scale for &#39;fill&#39; is already present. Adding another scale for &#39;fill&#39;, which
 ## will replace the existing scale.</code></pre>
-<p><img src="uberAnalysis_files/figure-html/prelim-1.png" width="672" /></p>
+<p><img src="/post/uberAnalysis/uberAnalysis_files/figure-html/prelim-1.png" width="672" /></p>
 <p>Seems like on an average I took about 10-20 rides a month, seemingly growing with every year. there seems to be a coherent pattern in that number of rides increase monotonically as we move from January to February (except for in 2018). The month of September-November seems generally low.</p>
 <p>Now, I moved from New Delhi, India, to Berkeley, California, in the month of August, 2018. Can we see this move reflect different patterns?</p>
 </div>
@@ -89,7 +96,7 @@ ggplot(myrides, aes(y = duration_mins, x = month_year)) + geom_boxplot() +
   theme(axis.text.x = element_blank()) + 
   labs(y = &#39;Distribution of Rides&#39;, x = &#39;Time Period&#39;) +
   scale_fill_discrete(name = &quot;Year&quot;)</code></pre>
-<p><img src="uberAnalysis_files/figure-html/avg_time-1.png" width="672" /></p>
+<p><img src="/post/uberAnalysis/uberAnalysis_files/figure-html/avg_time-1.png" width="672" /></p>
 <p>The average time of my rides is decreasing: perhaps it makes sense, the traffic in New Delhi is insane compared to the traffic in Berkeley.</p>
 </div>
 <div id="fare-habits" class="section level2">
@@ -115,7 +122,7 @@ ggplot(inr) +
   geom_point(aes(y = cumulative_fare, x = month_year, color = factor(year))) + 
   theme_tufte() +
   transition_states(year, wrap = T) </code></pre>
-<p><img src="uberAnalysis_files/figure-html/animation1-1.gif" /><!-- --></p>
+<p><img src="/post/uberAnalysis/uberAnalysis_files/figure-html/animation1-1.gif" /><!-- --></p>
 <pre class="r"><code>  # labs(title = &quot;Year: {frame_time}&quot;) +
   # view_follow(fixed_x = T)
 
