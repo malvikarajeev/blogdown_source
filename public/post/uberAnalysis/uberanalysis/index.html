@@ -33,7 +33,7 @@ I&#39;m removing remote 2020 and 2015 (it contains only one day) for now because
  reading in the data myrides = read.csv(&quot;https://raw.githubusercontent.com/malvikarajeev/uberAnalysis/master/trips_data.csv&quot;) head(myrides) ## City Product.Type Trip.or.Order.Status Request.Time ## 1 Los Angeles UberX COMPLETED 2020-02-17 04:43:38 &#43;0000 UTC ## 2 Los Angeles UberX COMPLETED 2020-02-17 01:17:06 &#43;0000 UTC ## 3 Los Angeles UberX COMPLETED 2020-02-16 20:29:34 &#43;0000 UTC ## 4 Los Angeles UberX COMPLETED 2020-02-16 18:45:42 &#43;0000 UTC ## 5 Los Angeles UberX COMPLETED 2020-02-16 00:17:16 &#43;0000 UTC ## 6 Los Angeles UberX DRIVER_CANCELED 2020-02-15 23:36:22 &#43;0000 UTC ## Begin.">
 
   
-  <link rel="alternate" hreflang="en-us" href="/post/uberanalysis/uberanalysis/">
+  <link rel="alternate" hreflang="en-us" href="../../../post/uberanalysis/uberanalysis/">
 
   
 
@@ -201,7 +201,7 @@ I&#39;m removing remote 2020 and 2015 (it contains only one day) for now because
   
   
   
-  <link rel="stylesheet" href="/css/academic.css">
+  <link rel="stylesheet" href="../../../css/academic.css">
 
   
 
@@ -213,11 +213,11 @@ I&#39;m removing remote 2020 and 2015 (it contains only one day) for now because
 
   
 
-  <link rel="manifest" href="/index.webmanifest">
-  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
-  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+  <link rel="manifest" href="../../../index.webmanifest">
+  <link rel="icon" type="image/png" href="../../../images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="../../../images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
 
-  <link rel="canonical" href="/post/uberanalysis/uberanalysis/">
+  <link rel="canonical" href="../../../post/uberanalysis/uberanalysis/">
 
   
   
@@ -354,7 +354,7 @@ I&#39;m removing remote 2020 and 2015 (it contains only one day) for now because
 
     
     <div class="d-none d-lg-inline-flex">
-      <a class="navbar-brand" href="/">Malvika R</a>
+      <a class="navbar-brand" href="../../../">Malvika R</a>
     </div>
     
 
@@ -367,7 +367,7 @@ I&#39;m removing remote 2020 and 2015 (it contains only one day) for now because
 
     
     <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
-      <a class="navbar-brand" href="/">Malvika R</a>
+      <a class="navbar-brand" href="../../../">Malvika R</a>
     </div>
     
 
@@ -402,7 +402,7 @@ I&#39;m removing remote 2020 and 2015 (it contains only one day) for now because
         
 
         <li class="nav-item">
-          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+          <a class="nav-link " href="../../../#posts"><span>Posts</span></a>
         </li>
 
         
@@ -431,7 +431,7 @@ I&#39;m removing remote 2020 and 2015 (it contains only one day) for now because
         
 
         <li class="nav-item">
-          <a class="nav-link " href="/#reviews"><span>Reviews</span></a>
+          <a class="nav-link " href="../../../#reviews"><span>Reviews</span></a>
         </li>
 
         
@@ -460,7 +460,7 @@ I&#39;m removing remote 2020 and 2015 (it contains only one day) for now because
         
 
         <li class="nav-item">
-          <a class="nav-link " href="/#contact"><span>Contact</span></a>
+          <a class="nav-link " href="../../../#contact"><span>Contact</span></a>
         </li>
 
         
@@ -650,7 +650,7 @@ myrides$month_year = format(as.Date(myrides$Begin.Trip.Time), &quot;%Y-%m&quot;)
   scale_fill_discrete(name = &quot;Year&quot;)</code></pre>
 <pre><code>## Scale for &#39;fill&#39; is already present. Adding another scale for &#39;fill&#39;, which
 ## will replace the existing scale.</code></pre>
-<p><img src="/post/uberAnalysis/uberAnalysis_files/figure-html/prelim-1.png" width="672" /></p>
+<p><img src="../../../post/uberAnalysis/uberAnalysis_files/figure-html/prelim-1.png" width="672" /></p>
 <p>Seems like on an average I took about 10-20 rides a month, seemingly growing with every year. there seems to be a coherent pattern in that number of rides increase monotonically as we move from January to February (except for in 2018). The month of September-November seems generally low.</p>
 <p>Now, I moved from New Delhi, India, to Berkeley, California, in the month of August, 2018. Can we see this move reflect different patterns?</p>
 </div>
@@ -665,7 +665,7 @@ ggplot(myrides, aes(y = duration_mins, x = month_year)) + geom_boxplot() +
   theme(axis.text.x = element_blank()) + 
   labs(y = &#39;Distribution of Rides&#39;, x = &#39;Time Period&#39;) +
   scale_fill_discrete(name = &quot;Year&quot;)</code></pre>
-<p><img src="/post/uberAnalysis/uberAnalysis_files/figure-html/avg_time-1.png" width="672" /></p>
+<p><img src="../../../post/uberAnalysis/uberAnalysis_files/figure-html/avg_time-1.png" width="672" /></p>
 <p>The average time of my rides is decreasing: perhaps it makes sense, the traffic in New Delhi is insane compared to the traffic in Berkeley.</p>
 </div>
 <div id="fare-habits" class="section level2">
@@ -691,7 +691,7 @@ ggplot(inr) +
   geom_point(aes(y = cumulative_fare, x = month_year, color = factor(year))) + 
   theme_tufte() +
   transition_states(year, wrap = T) </code></pre>
-<p><img src="/post/uberAnalysis/uberAnalysis_files/figure-html/animation1-1.gif" /><!-- --></p>
+<p><img src="../../../post/uberAnalysis/uberAnalysis_files/figure-html/animation1-1.gif" /><!-- --></p>
 <pre class="r"><code>  # labs(title = &quot;Year: {frame_time}&quot;) +
   # view_follow(fixed_x = T)
 
@@ -926,11 +926,11 @@ shinyApp(ui = ui, server = server)</code></pre>
   <div class="media author-card content-widget-hr">
     
       
-      <img class="avatar mr-3 avatar-circle" src="/authors/admin/avatar_hu21b1ecab893026c8ae52f4df535b0e49_2520766_270x270_fill_q90_lanczos_center.jpg" alt="Avatar">
+      <img class="avatar mr-3 avatar-circle" src="../../../authors/admin/avatar_hu83ebb9b8629208dcfd2a18eba9981c67_46739_270x270_fill_q90_lanczos_center.jpg" alt="Avatar">
     
 
     <div class="media-body">
-      <h5 class="card-title"><a href="/">Malvika Rajeev</a></h5>
+      <h5 class="card-title"><a href="../../../">Malvika Rajeev</a></h5>
       
       
       <ul class="network-icon" aria-hidden="true">
@@ -947,7 +947,7 @@ shinyApp(ui = ui, server = server)</code></pre>
       
     
     <li>
-      <a href="/#contact" >
+      <a href="../../../#contact" >
         <i class="fas fa-envelope"></i>
       </a>
     </li>
@@ -1125,7 +1125,7 @@ shinyApp(ui = ui, server = server)</code></pre>
     
     
     
-    <script src="/js/academic.min.a8d7005002cb4a052fd6d721e83df9ba.js"></script>
+    <script src="../../../js/academic.min.a8d7005002cb4a052fd6d721e83df9ba.js"></script>
 
     
 
@@ -1141,11 +1141,11 @@ shinyApp(ui = ui, server = server)</code></pre>
   
   <p class="powered-by">
     
-      <a href="/privacy/">Privacy Policy</a>
+      <a href="../../../privacy/">Privacy Policy</a>
     
     
        &middot; 
-      <a href="/terms/">Terms</a>
+      <a href="../../../terms/">Terms</a>
     
   </p>
   
